@@ -31,21 +31,33 @@ app.get('/api/health', (req, res) => {
 // CREATE - Add new room
 app.post('/api/rooms', async (req, res) => {
     try {
-        const { id,description,area,x,y } = req.body;
-        
+        const { id, description, area, x, y } = req.body;
+
+        // Basic validation
+        if (
+            typeof id !== 'number' ||
+            typeof description !== 'string' || description.trim() === '' ||
+            typeof area !== 'number' ||
+            typeof x !== 'number' ||
+            typeof y !== 'number'
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid input: Please provide valid id, description, area, x, and y values.'
+            });
+        }
+
         const [result] = await pool.execute(
             'INSERT INTO rooms (id,description,area,x,y) VALUES (?, ?, ?, ?, ?)',
-            [id,description,area,x,y]
-
+            [id, description, area, x, y]
         );
-        
         //Room created successfully
         res.status(201).json({
             success: true,
             message: 'Success',
             roomId: result.insertId
         });
-        //Error creating room
+        // Error creating room
     } catch (error) {
         res.status(500).json({
             success: false,
