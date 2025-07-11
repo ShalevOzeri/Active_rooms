@@ -141,45 +141,6 @@ app.put('/api/areas', async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Start server
 app.listen(PORT, () => {
     console.log(`Active Rooms Detection Server running on port ${PORT}`);
