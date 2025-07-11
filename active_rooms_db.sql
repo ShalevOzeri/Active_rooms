@@ -16,6 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `area_room`
+--
+
+DROP TABLE IF EXISTS `area_room`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `area_room` (
+  `area_id` varchar(10) NOT NULL,
+  `room_id` varchar(10) NOT NULL,
+  PRIMARY KEY (`area_id`,`room_id`),
+  KEY `room_id` (`room_id`),
+  CONSTRAINT `area_room_ibfk_1` FOREIGN KEY (`area_id`) REFERENCES `areas` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `area_room_ibfk_2` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `area_room`
+--
+
+LOCK TABLES `area_room` WRITE;
+/*!40000 ALTER TABLE `area_room` DISABLE KEYS */;
+/*!40000 ALTER TABLE `area_room` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `areas`
 --
 
@@ -108,4 +134,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-17 22:36:30
+-- Dump completed on 2025-07-11 13:35:41
