@@ -36,18 +36,20 @@ app.post('/api/rooms', async (req, res) => {
         const [result] = await pool.execute(
             'INSERT INTO rooms (id,description,area,x,y) VALUES (?, ?, ?, ?, ?)',
             [id,description,area,x,y]
+
         );
         
-        
+        //Room created successfully
         res.status(201).json({
             success: true,
-            message: 'Room created successfully',
+            message: 'Success',
             roomId: result.insertId
         });
+        //Error creating room
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error creating room',
+            message: 'Error',
             error: error.message
         });
     }
@@ -60,7 +62,7 @@ app.get('/api/rooms', async (req, res) => {
     try {
         const [rows] = await pool.execute(`
             SELECT 
-                r.id, r.description, r.area, r.x, r.y
+            r.id, r.description, r.area, r.x, r.y
             FROM rooms r
             ORDER BY r.id
         `);
@@ -69,10 +71,11 @@ app.get('/api/rooms', async (req, res) => {
             success: true,
             data: rows
         });
+        // Error fetching rooms
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error fetching rooms',
+            message: 'Error',
             error: error.message
         });
     }
@@ -87,18 +90,19 @@ app.delete('/api/rooms/:id', async (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Room not found'
+                message: 'Error'//Room not found
             });
         }
-        
+        // Room deleted successfully
         res.json({
             success: true,
-            message: 'Room deleted successfully'
+            message: 'Success'
         });
+        // Error deleting room
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error deleting room',
+            message: 'Error',
             error: error.message
         });
     }
@@ -116,22 +120,23 @@ app.put('/api/areas', async (req, res) => {
             'UPDATE areas SET name = ?, description = ?, path = ?, restriction = ? WHERE id = ?',
             [name, description, path, restriction, id]
         );
-        
+        //area not found
         if (result.affectedRows === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'area not found'
+                message: 'Error'
             });
         }
-        
+        //area updated successfully
         res.json({
             success: true,
-            message: 'area updated successfully'
+            message: 'Success'
         });
+        // Error updating area
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error updating area',
+            message: 'Error',
             error: error.message
         });
     }
