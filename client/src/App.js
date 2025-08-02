@@ -1,10 +1,10 @@
-import MapImage from './MapImage';
+import React from 'react';
+import { MapViewer } from './components';
 
 function App() {
   return (
     <div>
-      <h1>מפה</h1>
-      <MapImage />
+      <MapViewer />
     </div>
   );
 }
