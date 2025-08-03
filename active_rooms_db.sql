@@ -135,3 +135,10 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-07-11 13:35:41
+DB_HOST=127.0.0.1
+DB_USER=root
+DB_PASSWORD=121074Aa
+DB_NAME=active_rooms
+DB_PORT=3306
+PORT=3000
+SOURCE C:/Users/shale/Desktop/Active\ rooms/sync_database.sql;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
@@ -7,12 +7,36 @@
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
-      content="Web site created using create-react-app"
+      content="Active Rooms Detection System - HIT Holon Campus"
     />
-    <title>React App</title>
+    <title>🏠 Active Rooms - HIT Holon</title>
+    <style>
+      /* Loading screen while React loads */
+      #root {
+        min-height: 100vh;
+      }
+      .loading-fallback {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 24px;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Fallback loading content -->
+      <div class="loading-fallback">
+        <div>
+          <h1>🏠 Active Rooms</h1>
+          <p>טוען מערכת זיהוי חדרים פעילים...</p>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
