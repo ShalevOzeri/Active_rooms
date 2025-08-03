@@ -92,7 +92,7 @@ CREATE TABLE `rooms` (
 
 LOCK TABLES `rooms` WRITE;
 /*!40000 ALTER TABLE `rooms` DISABLE KEYS */;
-INSERT INTO `rooms` VALUES ('15','Conference Room',1,10,20),('2','Conference Room',2,300,150),('4','Conference Room',6,450,300),('64','Conference Room',3,10,20),('78','Conference Room',4,11,20),('90','Conference Room',5,10,20);
+INSERT INTO `rooms` VALUES ('101','Conference Room',7,12,22),('102','Conference Room',7,310,160),('103','Conference Room',7,460,310),('104','Conference Room',8,13,23),('105','Conference Room',8,320,170),('106','Conference Room',8,470,320),('15','Conference Room',1,10,20),('2','Conference Room',2,300,150),('4','Conference Room',6,450,300),('64','Conference Room',3,10,20),('78','Conference Room',4,11,20),('90','Conference Room',5,10,20);
 /*!40000 ALTER TABLE `rooms` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -123,7 +123,7 @@ CREATE TABLE `sensors` (
 
 LOCK TABLES `sensors` WRITE;
 /*!40000 ALTER TABLE `sensors` DISABLE KEYS */;
-INSERT INTO `sensors` VALUES ('S001','15',150,100,'available','2025-08-02 22:16:08','2025-08-02 22:16:08'),('S002','2',300,150,'occupied','2025-08-02 22:16:08','2025-08-02 22:16:08'),('S003','4',450,200,'error','2025-08-02 22:16:08','2025-08-02 22:16:08'),('S004','64',200,300,'available','2025-08-02 22:16:08','2025-08-02 22:16:08'),('S007','15',150,120,'available','2025-08-03 10:39:00','2025-08-03 10:39:00'),('S008','64',250,70,'error','2025-08-03 10:57:18','2025-08-03 10:57:18');
+INSERT INTO `sensors` VALUES ('S001','15',150,100,'available','2025-08-02 22:16:08','2025-08-02 22:16:08'),('S003','4',450,200,'error','2025-08-02 22:16:08','2025-08-02 22:16:08'),('S004','64',200,300,'available','2025-08-02 22:16:08','2025-08-02 22:16:08'),('S007','15',150,120,'available','2025-08-03 10:39:00','2025-08-03 10:39:00'),('S008','64',250,70,'error','2025-08-03 10:57:18','2025-08-03 10:57:18'),('S011','64',33,255,'occupied','2025-08-03 13:58:59','2025-08-03 13:58:59'),('S017','103',180,233,'occupied','2025-08-03 13:59:35','2025-08-03 13:59:35'),('TEST001','2',110,300,'available','2025-08-03 13:33:40','2025-08-03 13:33:40');
 /*!40000 ALTER TABLE `sensors` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -165,15 +165,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-03 14:46:44
-
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2025-07-11 13:35:41
-DB_HOST=127.0.0.1
-DB_USER=root
-DB_PASSWORD=121074Aa
-DB_NAME=active_rooms
-DB_PORT=3306
-PORT=3000
-SOURCE C:/Users/shale/Desktop/Active\ rooms/sync_database.sql;
+-- Dump completed on 2025-08-03 17:06:37

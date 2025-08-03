@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import Map from './components/Map';
 
 // Simple Login Component
 const Login = ({ onLogin }) => {
@@ -321,9 +322,12 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms }) => {
 const Dashboard = ({ user, onLogout }) => {
   const [sensors, setSensors] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [areas, setAreas] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [selectedSensor, setSelectedSensor] = useState(null);
+  const [showMap, setShowMap] = useState(true);
 
   useEffect(() => {
     fetchData();
@@ -420,6 +424,12 @@ const Dashboard = ({ user, onLogout }) => {
     }
   }, [message]);
 
+  // הוסף פונקציה לטיפול בלחיצה על חיישן במפה
+  const handleSensorClick = (sensor) => {
+    setSelectedSensor(sensor);
+    setMessage(`📡 Selected sensor: ${sensor.id} - Status: ${sensor.status} - Room: ${sensor.room_id || 'N/A'}`);
+  };
+
   return (
     <div>
       <header style={{background: 'white', padding: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}}>
@@ -498,7 +508,7 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
         </div>
 
-        {/* Areas Section - שורה חדשה */}
+        {/* Areas Section */}
         <div style={{background: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px'}}>
           <h2>Areas Overview</h2>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px'}}>
@@ -844,6 +854,39 @@ const Dashboard = ({ user, onLogout }) => {
             ))}
           </div>
         </div>
+
+        {/* 🗺️ המפה עברה לכאן - תחתית הדשבורד */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <h2>🗺️ Campus Map</h2>
+          <button
+            onClick={() => setShowMap(!showMap)}
+            style={{
+              padding: '10px 20px',
+              background: showMap ? '#FF5722' : '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            {showMap ? '🗺️ Hide Map' : '🗺️ Show Map'}
+          </button>
+        </div>
+
+        {/* רכיב המפה בתחתית */}
+        {showMap && (
+          <Map 
+            sensors={sensors} 
+            rooms={rooms} 
+            onSensorClick={handleSensorClick}
+          />
+        )}
       </main>
 
       {/* Add Sensor Modal */}

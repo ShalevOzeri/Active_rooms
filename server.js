@@ -58,15 +58,145 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// === VALIDATION FUNCTIONS ===
+const validateSensorData = (data, isUpdate = false) => {
+    const errors = [];
+    
+    // בדיקת ID (רק אם לא עדכון, או אם צוין)
+    if (data.id !== undefined) {
+        if (!data.id || typeof data.id !== 'string' || data.id.trim() === '') {
+            errors.push('ID must be a non-empty string');
+        } else if (data.id.length > 50) {
+            errors.push('ID must be 50 characters or less');
+        } else if (!/^[A-Za-z0-9_-]+$/.test(data.id)) {
+            errors.push('ID can only contain letters, numbers, underscores, and hyphens');
+        }
+    } else if (!isUpdate) {
+        errors.push('ID is required');
+    }
+    
+    // בדיקת קואורדינטות X
+    if (data.x !== undefined) {
+        const x = parseInt(data.x);
+        if (isNaN(x)) {
+            errors.push('X coordinate must be a valid number');
+        } else if (x < 0 || x > 800) {
+            errors.push('X coordinate must be between 0 and 800');
+        }
+    } else if (!isUpdate) {
+        errors.push('X coordinate is required');
+    }
+    
+    // בדיקת קואורדינטות Y
+    if (data.y !== undefined) {
+        const y = parseInt(data.y);
+        if (isNaN(y)) {
+            errors.push('Y coordinate must be a valid number');
+        } else if (y < 0 || y > 600) {
+            errors.push('Y coordinate must be between 0 and 600');
+        }
+    } else if (!isUpdate) {
+        errors.push('Y coordinate is required');
+    }
+    
+    // בדיקת Status
+    if (data.status !== undefined && !['available', 'occupied', 'error', 'maintenance'].includes(data.status)) {
+        errors.push('Status must be one of: available, occupied, error, maintenance');
+    }
+    
+    // בדיקת Room ID
+    if (data.room_id !== undefined && data.room_id !== null && data.room_id !== '') {
+        if (typeof data.room_id !== 'string' || data.room_id.length > 10) {
+            errors.push('Room ID must be a string with 10 characters or less');
+        }
+    }
+    
+    return errors;
+};
+
+const validateUserData = (data) => {
+    const errors = [];
+    
+    // בדיקת Username
+    if (!data.username || typeof data.username !== 'string' || data.username.trim() === '') {
+        errors.push('Username is required and must be a non-empty string');
+    } else if (data.username.length > 50) {
+        errors.push('Username must be 50 characters or less');
+    } else if (!/^[A-Za-z0-9_-]+$/.test(data.username)) {
+        errors.push('Username can only contain letters, numbers, underscores, and hyphens');
+    }
+    
+    // בדיקת Password
+    if (!data.password || typeof data.password !== 'string' || data.password.length < 3) {
+        errors.push('Password must be at least 3 characters long');
+    } else if (data.password.length > 255) {
+        errors.push('Password must be 255 characters or less');
+    }
+    
+    // בדיקת Email
+    if (data.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(data.email)) {
+            errors.push('Email must be a valid email address');
+        } else if (data.email.length > 100) {
+            errors.push('Email must be 100 characters or less');
+        }
+    }
+    
+    // בדיקת Phone
+    if (data.phone) {
+        if (typeof data.phone !== 'string' || data.phone.length > 20) {
+            errors.push('Phone must be a string with 20 characters or less');
+        } else if (!/^[0-9+\-\s()]+$/.test(data.phone)) {
+            errors.push('Phone can only contain numbers, +, -, spaces, and parentheses');
+        }
+    }
+    
+    // בדיקת Role
+    if (data.role !== undefined && ![0, 1, '0', '1'].includes(data.role)) {
+        errors.push('Role must be 0 (user) or 1 (admin)');
+    }
+    
+    return errors;
+};
+
+const validateRoomData = (data) => {
+    const errors = [];
+    
+    // בדיקת ID
+    if (!data.id || typeof data.id !== 'string' || data.id.trim() === '') {
+        errors.push('Room ID is required and must be a non-empty string');
+    } else if (data.id.length > 10) {
+        errors.push('Room ID must be 10 characters or less');
+    }
+    
+    // בדיקת Description
+    if (data.description && (typeof data.description !== 'string' || data.description.length > 255)) {
+        errors.push('Description must be a string with 255 characters or less');
+    }
+    
+    // בדיקת Area
+    if (data.area && (!Number.isInteger(parseInt(data.area)) || parseInt(data.area) < 1)) {
+        errors.push('Area must be a valid positive integer (area ID)');
+    }
+    
+    return errors;
+};
+
 // === AUTH API ===
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        if (!username || !password) {
+        console.log(`🔐 Login attempt: username="${username}"`);
+
+        // Validation
+        const validationErrors = validateUserData({ username, password });
+        if (validationErrors.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Username and password are required'
+                message: 'Validation failed',
+                errors: validationErrors
             });
         }
 
@@ -76,6 +206,7 @@ app.post('/api/auth/login', async (req, res) => {
         );
 
         if (users.length === 0) {
+            console.log(`❌ Invalid credentials for: ${username}`);
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
@@ -83,6 +214,8 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         const user = users[0];
+        console.log(`✅ Login successful for: ${user.username}`);
+        
         res.json({
             success: true,
             user: {
@@ -95,6 +228,7 @@ app.post('/api/auth/login', async (req, res) => {
         });
 
     } catch (error) {
+        console.error('❌ Login error:', error);
         res.status(500).json({
             success: false,
             message: 'Server error',
@@ -150,36 +284,26 @@ app.get('/api/sensors', authenticateUser, async (req, res) => {
     }
 });
 
-// Add Sensor (החלף את הפונקציה הקיימת)
+// Add Sensor (מעודכן עם validation)
 app.post('/api/sensors', authenticateUser, requireAdmin, async (req, res) => {
     try {
         const { id, x, y, room_id, status = 'available' } = req.body;
 
-        // בדיקת נתונים חובה
-        if (!id || x === undefined || y === undefined || !status) {
-            return res.json({ 
+        console.log('📝 Received sensor data:', { id, x, y, room_id, status });
+
+        // Validation מקיף (isUpdate = false)
+        const validationErrors = validateSensorData({ id, x, y, room_id, status }, false);
+        if (validationErrors.length > 0) {
+            return res.status(400).json({ 
                 success: false, 
-                message: 'Missing required fields: id, x, y, status' 
+                message: 'Validation failed',
+                errors: validationErrors
             });
         }
 
-        // המרה למספרים ובדיקת תקינות
+        // המרה למספרים (אחרי validation)
         const xCoord = parseInt(x);
         const yCoord = parseInt(y);
-        
-        if (isNaN(xCoord) || isNaN(yCoord)) {
-            return res.json({ 
-                success: false, 
-                message: 'X and Y coordinates must be valid numbers' 
-            });
-        }
-
-        if (xCoord < 0 || xCoord > 800 || yCoord < 0 || yCoord > 600) {
-            return res.json({ 
-                success: false, 
-                message: 'Coordinates out of range (X: 0-800, Y: 0-600)' 
-            });
-        }
 
         // בדיקה אם החיישן כבר קיים
         const [existingSensors] = await pool.execute(
@@ -188,10 +312,25 @@ app.post('/api/sensors', authenticateUser, requireAdmin, async (req, res) => {
         );
 
         if (existingSensors.length > 0) {
-            return res.json({ 
+            return res.status(409).json({ 
                 success: false, 
                 message: `Sensor ${id} already exists` 
             });
+        }
+
+        // בדיקה אם החדר קיים (אם צוין)
+        if (room_id) {
+            const [existingRooms] = await pool.execute(
+                'SELECT id FROM rooms WHERE id = ?',
+                [room_id]
+            );
+
+            if (existingRooms.length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Room ${room_id} does not exist` 
+                });
+            }
         }
 
         // הוספת החיישן
@@ -202,7 +341,7 @@ app.post('/api/sensors', authenticateUser, requireAdmin, async (req, res) => {
 
         console.log(`✅ Sensor added: ${id} at (${xCoord}, ${yCoord})`);
         
-        res.json({ 
+        res.status(201).json({ 
             success: true, 
             message: `Sensor ${id} added successfully`,
             data: { id, x: xCoord, y: yCoord, room_id, status }
@@ -210,22 +349,112 @@ app.post('/api/sensors', authenticateUser, requireAdmin, async (req, res) => {
 
     } catch (error) {
         console.error('❌ Error adding sensor:', error);
-        res.json({ 
+        res.status(500).json({ 
             success: false, 
             message: 'Database error: ' + error.message 
         });
     }
 });
 
-// Update Sensor
+// Update Sensor (מעודכן עם validation)
 app.put('/api/sensors/:id', authenticateUser, requireAdmin, async (req, res) => {
     try {
         const { x, y, status, room_id } = req.body;
         const sensorId = req.params.id;
 
+        console.log(`📝 Updating sensor ${sensorId}:`, { x, y, status, room_id });
+
+        // Validation של ID בURL
+        if (!sensorId || typeof sensorId !== 'string' || sensorId.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Sensor ID in URL is required'
+            });
+        }
+
+        // בדיקה שיש לפחות שדה אחד לעדכון
+        if (x === undefined && y === undefined && status === undefined && room_id === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: 'At least one field (x, y, status, room_id) must be provided for update'
+            });
+        }
+
+        // Validation של הנתונים המעודכנים (רק של השדות שנשלחו)
+        const updateData = {};
+        if (x !== undefined) updateData.x = x;
+        if (y !== undefined) updateData.y = y;
+        if (status !== undefined) updateData.status = status;
+        if (room_id !== undefined) updateData.room_id = room_id;
+
+        // קריאה ל-validation עם isUpdate = true
+        const validationErrors = validateSensorData(updateData, true);
+        if (validationErrors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors: validationErrors
+            });
+        }
+
+        // בדיקה אם החיישן קיים
+        const [existingSensors] = await pool.execute(
+            'SELECT id, x, y, status, room_id FROM sensors WHERE id = ?',
+            [sensorId]
+        );
+
+        if (existingSensors.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: `Sensor ${sensorId} not found`
+            });
+        }
+
+        const currentSensor = existingSensors[0];
+
+        // בדיקה אם החדר קיים (אם צוין)
+        if (room_id !== undefined && room_id !== null && room_id !== '') {
+            const [existingRooms] = await pool.execute(
+                'SELECT id FROM rooms WHERE id = ?',
+                [room_id]
+            );
+
+            if (existingRooms.length === 0) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: `Room ${room_id} does not exist` 
+                });
+            }
+        }
+
+        // בניית השאילתה רק עם השדות שצריך לעדכן
+        const updateFields = [];
+        const updateValues = [];
+
+        if (x !== undefined) {
+            updateFields.push('x = ?');
+            updateValues.push(parseInt(x));
+        }
+        if (y !== undefined) {
+            updateFields.push('y = ?');
+            updateValues.push(parseInt(y));
+        }
+        if (status !== undefined) {
+            updateFields.push('status = ?');
+            updateValues.push(status);
+        }
+        if (room_id !== undefined) {
+            updateFields.push('room_id = ?');
+            updateValues.push(room_id || null);
+        }
+
+        updateFields.push('updated_at = CURRENT_TIMESTAMP');
+        updateValues.push(sensorId);
+
+        // עדכון החיישן
         const [result] = await pool.execute(
-            'UPDATE sensors SET x = ?, y = ?, status = ?, room_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-            [x, y, status, room_id || null, sensorId]
+            `UPDATE sensors SET ${updateFields.join(', ')} WHERE id = ?`,
+            updateValues
         );
 
         if (result.affectedRows === 0) {
@@ -235,26 +464,49 @@ app.put('/api/sensors/:id', authenticateUser, requireAdmin, async (req, res) => 
             });
         }
 
+        console.log(`✅ Sensor updated: ${sensorId}`);
         res.json({
             success: true,
-            message: 'Sensor updated successfully'
+            message: `Sensor ${sensorId} updated successfully`,
+            updated: {
+                ...currentSensor,
+                ...(x !== undefined && { x: parseInt(x) }),
+                ...(y !== undefined && { y: parseInt(y) }),
+                ...(status !== undefined && { status }),
+                ...(room_id !== undefined && { room_id })
+            }
         });
 
     } catch (error) {
+        console.error('❌ Error updating sensor:', error);
         res.status(500).json({
             success: false,
-            message: 'Error updating sensor',
-            error: error.message
+            message: 'Database error: ' + error.message
         });
     }
 });
 
-// Delete Sensor (החדש והמתוקן)
+// Delete Sensor (מעודכן עם validation)
 app.delete('/api/sensors/:id', authenticateUser, requireAdmin, async (req, res) => {
     try {
         const sensorId = req.params.id;
         
         console.log(`🗑️ Attempting to delete sensor: ${sensorId}`);
+        
+        // Validation של ID
+        if (!sensorId || typeof sensorId !== 'string' || sensorId.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Sensor ID is required and must be a valid string'
+            });
+        }
+
+        if (sensorId.length > 50) {
+            return res.status(400).json({
+                success: false,
+                message: 'Sensor ID must be 50 characters or less'
+            });
+        }
         
         // בדיקה אם החיישן קיים
         const [existingSensors] = await pool.execute(
@@ -263,7 +515,7 @@ app.delete('/api/sensors/:id', authenticateUser, requireAdmin, async (req, res) 
         );
 
         if (existingSensors.length === 0) {
-            return res.json({ 
+            return res.status(404).json({ 
                 success: false, 
                 message: `Sensor ${sensorId} not found` 
             });
@@ -282,7 +534,7 @@ app.delete('/api/sensors/:id', authenticateUser, requireAdmin, async (req, res) 
                 message: `Sensor ${sensorId} deleted successfully` 
             });
         } else {
-            res.json({ 
+            res.status(500).json({ 
                 success: false, 
                 message: 'Failed to delete sensor' 
             });
@@ -290,15 +542,49 @@ app.delete('/api/sensors/:id', authenticateUser, requireAdmin, async (req, res) 
 
     } catch (error) {
         console.error('❌ Error deleting sensor:', error);
-        res.json({ 
+        res.status(500).json({ 
             success: false, 
             message: 'Database error: ' + error.message 
         });
     }
 });
 
+// === AREAS API ===
+app.get('/api/areas', async (req, res) => {
+    try {
+        const [rows] = await pool.execute('SELECT * FROM areas ORDER BY name');
+        
+        res.json({
+            success: true,
+            data: rows
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching areas',
+            error: error.message
+        });
+    }
+});
+
+// === STATUS API ===
+app.get('/api/status', (req, res) => {
+    res.json({
+        success: true,
+        message: 'Server supports multiple concurrent connections with comprehensive validation',
+        info: {
+            activeConnections: 'Multiple clients can connect simultaneously',
+            technology: 'Express.js with async/await',
+            database: 'MySQL connection pool',
+            validation: 'Comprehensive data validation enabled'
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Active Rooms Detection Server running on port ${PORT}`);
     console.log(`📊 Health Check: http://localhost:${PORT}/api/health`);
     console.log(`📡 API Base URL: http://localhost:${PORT}/api`);
+    console.log(`✅ Comprehensive validation enabled`);
 });
