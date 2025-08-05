@@ -68,7 +68,7 @@ const Login = ({ onLogin }) => {
 };
 
 // Add Sensor Modal Component
-const AddSensorModal = ({ isOpen, onClose, onSave, rooms }) => {
+const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
   const [sensorData, setSensorData] = useState({
     id: '',
     x: '',
@@ -80,26 +80,28 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms }) => {
 
   const validateData = () => {
     const newErrors = {};
-    
+
     // בדיקת ID
-    if (!sensorData.id.trim()) {
+    if (!sensorData.id) {
       newErrors.id = 'Sensor ID is required';
     } else if (!/^S\d{3}$/.test(sensorData.id)) {
-      newErrors.id = 'ID format should be S001, S002, etc.';
+      newErrors.id = 'ID must be in format S001, S002, ...';
+    } else if (sensors.some(sensor => sensor.id === sensorData.id)) {
+      newErrors.id = 'Sensor ID already exists';
     }
-    
+
     // בדיקת X
     const x = parseInt(sensorData.x);
     if (isNaN(x) || x < 0 || x > 800) {
       newErrors.x = 'X must be between 0-800';
     }
-    
+
     // בדיקת Y
     const y = parseInt(sensorData.y);
     if (isNaN(y) || y < 0 || y > 600) {
       newErrors.y = 'Y must be between 0-600';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -161,7 +163,7 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms }) => {
               type="text"
               value={sensorData.id}
               onChange={(e) => setSensorData({...sensorData, id: e.target.value.toUpperCase()})}
-              placeholder="S013"
+              placeholder="S001"
               required
               style={{
                 width: '100%',
@@ -240,7 +242,9 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms }) => {
             >
               <option value="">Select Room (Optional)</option>
               {rooms.map(room => (
-                <option key={room.id} value={room.id}>{room.id} - {room.description}</option>
+                <option key={room.id} value={room.id}>
+                  {room.id} - {room.description}
+                </option>
               ))}
             </select>
           </div>
@@ -318,16 +322,269 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms }) => {
   );
 };
 
+// Edit Sensor Modal Component
+const EditSensorModal = ({ isOpen, onClose, onSave, sensor, rooms, sensors }) => {
+  const [sensorData, setSensorData] = useState(sensor || {});
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    setSensorData(sensor || {});
+  }, [sensor]);
+
+  const validateData = () => {
+    const newErrors = {};
+    
+    // בדיקת ID
+    if (!sensorData.id.trim()) {
+      newErrors.id = 'Sensor ID is required';
+    } else if (!/^S\d{3}$/.test(sensorData.id)) {
+      newErrors.id = 'ID format should be S001, S002, etc.';
+    }
+    
+    // בדיקת X
+    const x = parseInt(sensorData.x);
+    if (isNaN(x) || x < 0 || x > 800) {
+      newErrors.x = 'X must be between 0-800';
+    }
+    
+    // בדיקת Y
+    const y = parseInt(sensorData.y);
+    if (isNaN(y) || y < 0 || y > 600) {
+      newErrors.y = 'Y must be between 0-600';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (validateData()) {
+      // המר למספרים לפני שליחה
+      const dataToSend = {
+        ...sensorData,
+        x: parseInt(sensorData.x),
+        y: parseInt(sensorData.y)
+      };
+      
+      onSave(dataToSend);
+      setSensorData({ id: '', x: '', y: '', room_id: '', status: 'available' });
+      setErrors({});
+    }
+  };
+
+  const handleClose = () => {
+    setSensorData({ id: '', x: '', y: '', room_id: '', status: 'available' });
+    setErrors({});
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }} onClick={handleClose}>
+      <div style={{
+        background: 'white',
+        padding: '25px',
+        borderRadius: '12px',
+        maxWidth: '450px',
+        width: '90%'
+      }} onClick={(e) => e.stopPropagation()}>
+        <h3 style={{ margin: '0 0 20px 0', color: '#333' }}>✏️ Edit Sensor</h3>
+        
+        <form onSubmit={handleSubmit}>
+          {/* Sensor ID */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Sensor ID: <span style={{ color: 'red' }}>*</span>
+            </label>
+            <input
+              type="text"
+              value={sensorData.id}
+              onChange={(e) => setSensorData({...sensorData, id: e.target.value.toUpperCase()})}
+              placeholder="S001"
+              required
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: `2px solid ${errors.id ? '#f44336' : '#ddd'}`,
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
+            {errors.id && <small style={{ color: '#f44336' }}>{errors.id}</small>}
+          </div>
+
+          {/* Coordinates */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                X Position: <span style={{ color: 'red' }}>*</span>
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="800"
+                value={sensorData.x}
+                onChange={(e) => setSensorData({...sensorData, x: e.target.value})}
+                placeholder="0-800"
+                required
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: `2px solid ${errors.x ? '#f44336' : '#ddd'}`,
+                  borderRadius: '6px',
+                  fontSize: '14px'
+                }}
+              />
+              {errors.x && <small style={{ color: '#f44336' }}>{errors.x}</small>}
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Y Position: <span style={{ color: 'red' }}>*</span>
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="600"
+                value={sensorData.y}
+                onChange={(e) => setSensorData({...sensorData, y: e.target.value})}
+                placeholder="0-600"
+                required
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: `2px solid ${errors.y ? '#f44336' : '#ddd'}`,
+                  borderRadius: '6px',
+                  fontSize: '14px'
+                }}
+              />
+              {errors.y && <small style={{ color: '#f44336' }}>{errors.y}</small>}
+            </div>
+          </div>
+
+          {/* Room Selection */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Room:
+            </label>
+            <select
+              value={sensorData.room_id}
+              onChange={(e) => setSensorData({...sensorData, room_id: e.target.value})}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '2px solid #ddd',
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            >
+              <option value="">Select Room (Optional)</option>
+              {rooms.map(room => (
+                <option key={room.id} value={room.id}>
+                  {room.id} - {room.description}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Status:
+            </label>
+            <select
+              value={sensorData.status}
+              onChange={(e) => setSensorData({...sensorData, status: e.target.value})}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '2px solid #ddd',
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            >
+              <option value="available">Available</option>
+              <option value="occupied">Occupied</option>
+              <option value="error">Error</option>
+            </select>
+          </div>
+
+          {/* Coordinate Helper */}
+          <div style={{ 
+            background: '#f0f8ff', 
+            padding: '10px', 
+            borderRadius: '6px', 
+            marginBottom: '20px',
+            fontSize: '12px',
+            color: '#666'
+          }}>
+            💡 <strong>Tip:</strong> Map coordinates: X (0-800), Y (0-600). 
+            Top-left is (0,0), bottom-right is (800,600).
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={handleClose}
+              style={{
+                flex: 1,
+                padding: '10px',
+                background: '#f44336',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              style={{
+                flex: 1,
+                padding: '10px',
+                background: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 // Enhanced Dashboard Component with Admin Features
 const Dashboard = ({ user, onLogout }) => {
   const [sensors, setSensors] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [areas, setAreas] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [selectedSensor, setSelectedSensor] = useState(null);
   const [showMap, setShowMap] = useState(true);
+  const [editSensor, setEditSensor] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -386,6 +643,33 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handleUpdateSensor = async (sensorData) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:3000/api/sensors/${sensorData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'username': user.credentials.username,
+          'password': user.credentials.password
+        },
+        body: JSON.stringify(sensorData)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setMessage(`✅ Sensor ${sensorData.id} updated successfully!`);
+        setEditSensor(null);
+        fetchData();
+      } else {
+        setMessage(`❌ Error: ${data.message}`);
+      }
+    } catch (error) {
+      setMessage('❌ Error updating sensor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteSensor = async (sensorId) => {
     if (!window.confirm(`Are you sure you want to delete sensor ${sensorId}?`)) {
       return;
@@ -429,6 +713,14 @@ const Dashboard = ({ user, onLogout }) => {
     setSelectedSensor(sensor);
     setMessage(`📡 Selected sensor: ${sensor.id} - Status: ${sensor.status} - Room: ${sensor.room_id || 'N/A'}`);
   };
+
+  const handleEditSensor = (sensor) => {
+    setEditSensor(sensor);
+    setShowEditModal(true);
+  };
+
+  // לדוג' הצגת חדרים בבניין S001, קומה 2
+  const filteredRooms = rooms.filter(room => room.area_name === 'S001' && room.floor === 2);
 
   return (
     <div>
@@ -513,145 +805,176 @@ const Dashboard = ({ user, onLogout }) => {
           <h2>Areas Overview</h2>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px'}}>
             {/* קבל רשימה ייחודית של אזורים */}
-            {[...new Set(rooms.map(room => room.area_name).filter(Boolean))].map(areaName => {
-              // מצא חדרים באזור הזה
-              const areaRooms = rooms.filter(room => room.area_name === areaName);
-              // מצא חיישנים באזור הזה
-              const areaSensors = sensors.filter(sensor => 
-                areaRooms.some(room => room.id === sensor.room_id)
-              );
-              
-              return (
-                <div
-                  key={areaName}
-                  style={{
-                    padding: '20px',
-                    borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white',
-                    boxShadow: '0 6px 12px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  {/* כותרת האזור */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    marginBottom: '15px',
-                    borderBottom: '2px solid rgba(255,255,255,0.3)',
-                    paddingBottom: '10px'
-                  }}>
-                    <div style={{fontSize: '24px', marginRight: '10px'}}>🏢</div>
-                    <h3 style={{margin: 0, fontSize: '20px', fontWeight: 'bold'}}>
-                      {areaName || 'Unknown Area'}
-                    </h3>
-                  </div>
+            {[...new Set(rooms.map(room => room.area_name).filter(Boolean))]
+              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+              .map(areaName => {
+                const areaRooms = rooms.filter(room => room.area_name === areaName);
+                const areaSensors = sensors.filter(sensor => 
+                  areaRooms.some(room => room.id === sensor.room_id)
+                );
+                return (
+                  <div
+                    key={areaName}
+                    style={{
+                      padding: '20px',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      boxShadow: '0 6px 12px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    {/* כותרת האזור */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: '15px',
+                      borderBottom: '2px solid rgba(255,255,255,0.3)',
+                      paddingBottom: '10px'
+                    }}>
+                      <div style={{fontSize: '24px', marginRight: '10px'}}>🏢</div>
+                      <h3 style={{margin: 0, fontSize: '20px', fontWeight: 'bold'}}>
+                        {areaName || 'Unknown Area'}
+                      </h3>
+                    </div>
 
-                  {/* סטטיסטיקות האזור */}
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: '10px',
-                    marginBottom: '15px'
-                  }}>
+                    {/* סטטיסטיקות האזור */}
                     <div style={{
-                      background: 'rgba(255,255,255,0.2)',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      textAlign: 'center'
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '10px',
+                      marginBottom: '15px'
                     }}>
-                      <div style={{fontSize: '20px', fontWeight: 'bold'}}>{areaRooms.length}</div>
-                      <div style={{fontSize: '12px', opacity: 0.9}}>Rooms</div>
-                    </div>
-                    <div style={{
-                      background: 'rgba(255,255,255,0.2)',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      textAlign: 'center'
-                    }}>
-                      <div style={{fontSize: '20px', fontWeight: 'bold'}}>{areaSensors.length}</div>
-                      <div style={{fontSize: '12px', opacity: 0.9}}>Sensors</div>
-                    </div>
-                    <div style={{
-                      background: 'rgba(255,255,255,0.2)',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      textAlign: 'center'
-                    }}>
-                      <div style={{fontSize: '20px', fontWeight: 'bold'}}>
-                        {areaSensors.filter(s => s.status === 'available').length}
+                      <div style={{
+                        background: 'rgba(255,255,255,0.2)',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{fontSize: '20px', fontWeight: 'bold'}}>{areaRooms.length}</div>
+                        <div style={{fontSize: '12px', opacity: 0.9}}>Rooms</div>
                       </div>
-                      <div style={{fontSize: '12px', opacity: 0.9}}>Available</div>
+                      <div style={{
+                        background: 'rgba(255,255,255,0.2)',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{fontSize: '20px', fontWeight: 'bold'}}>{areaSensors.length}</div>
+                        <div style={{fontSize: '12px', opacity: 0.9}}>Sensors</div>
+                      </div>
+                      <div style={{
+                        background: 'rgba(255,255,255,0.2)',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{fontSize: '20px', fontWeight: 'bold'}}>
+                          {areaSensors.filter(s => s.status === 'available').length}
+                        </div>
+                        <div style={{fontSize: '12px', opacity: 0.9}}>Available</div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* רשימת חדרים */}
-                  <div style={{marginBottom: '10px'}}>
-                    <strong style={{fontSize: '14px'}}>🏠 Rooms:</strong>
-                    <div style={{
-                      marginTop: '8px',
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '5px'
-                    }}>
-                      {areaRooms.map(room => (
-                        <span
-                          key={room.id}
-                          style={{
-                            background: 'rgba(255,255,255,0.2)',
-                            padding: '4px 8px',
-                            borderRadius: '12px',
+                    {/* רשימת חדרים */}
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{fontSize: '14px'}}>🏠 Rooms:</strong>
+                      <div style={{
+                        marginTop: '8px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '5px'
+                      }}>
+                        {areaRooms.map(room => (
+                          <span
+                            key={room.id}
+                            style={{
+                              background: 'rgba(255,255,255,0.2)',
+                              padding: '4px 8px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              border: '1px solid rgba(255,255,255,0.3)'
+                            }}
+                          >
+                            {room.id}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* רשימת חיישנים */}
+                    <div>
+                      <strong style={{fontSize: '14px'}}>📡 Sensors:</strong>
+                      <div style={{
+                        marginTop: '8px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '5px'
+                      }}>
+                        {areaSensors.map(sensor => (
+                          <span
+                            key={sensor.id}
+                            style={{
+                              background: sensor.status === 'available' ? 'rgba(76, 175, 80, 0.8)' :
+                                         sensor.status === 'occupied' ? 'rgba(255, 87, 34, 0.8)' :
+                                         'rgba(255, 193, 7, 0.8)',
+                              color: 'white',
+                              padding: '4px 8px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: 'bold'
+                            }}
+                            title={`${sensor.id} - ${sensor.status}`}
+                          >
+                            {sensor.id}
+                          </span>
+                        ))}
+                        {areaSensors.length === 0 && (
+                          <span style={{
+                            color: 'rgba(255,255,255,0.7)',
                             fontSize: '12px',
-                            border: '1px solid rgba(255,255,255,0.3)'
-                          }}
-                        >
-                          {room.id}
-                        </span>
-                      ))}
+                            fontStyle: 'italic'
+                          }}>
+                            No sensors assigned
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* רשימת חדרים לפי קומה */}
+                    <div style={{marginBottom: '10px'}}>
+                      <strong style={{fontSize: '14px'}}>🏠 Rooms by Floor:</strong>
+                      <div style={{marginTop: '8px'}}>
+                        {[...new Set(areaRooms.map(room => room.floor))]
+                          .sort((a, b) => a - b)
+                          .map(floor => (
+                            <div key={floor} style={{marginBottom: '6px'}}>
+                              <span style={{fontWeight: 'bold', color: '#ffd700'}}>Floor {floor}:</span>{' '}
+                              {areaRooms
+                                .filter(room => room.floor === floor)
+                                .map(room => (
+                                  <span
+                                    key={room.id}
+                                    style={{
+                                      background: 'rgba(255,255,255,0.2)',
+                                      padding: '4px 8px',
+                                      borderRadius: '12px',
+                                      fontSize: '12px',
+                                      border: '1px solid rgba(255,255,255,0.3)',
+                                      marginRight: '4px'
+                                    }}
+                                  >
+                                    {room.id}
+                                  </span>
+                                ))}
+                            </div>
+                          ))}
+                      </div>
                     </div>
                   </div>
-
-                  {/* רשימת חיישנים */}
-                  <div>
-                    <strong style={{fontSize: '14px'}}>📡 Sensors:</strong>
-                    <div style={{
-                      marginTop: '8px',
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '5px'
-                    }}>
-                      {areaSensors.map(sensor => (
-                        <span
-                          key={sensor.id}
-                          style={{
-                            background: sensor.status === 'available' ? 'rgba(76, 175, 80, 0.8)' :
-                                       sensor.status === 'occupied' ? 'rgba(255, 87, 34, 0.8)' :
-                                       'rgba(255, 193, 7, 0.8)',
-                            color: 'white',
-                            padding: '4px 8px',
-                            borderRadius: '12px',
-                            fontSize: '12px',
-                            fontWeight: 'bold'
-                          }}
-                          title={`${sensor.id} - ${sensor.status}`}
-                        >
-                          {sensor.id}
-                        </span>
-                      ))}
-                      {areaSensors.length === 0 && (
-                        <span style={{
-                          color: 'rgba(255,255,255,0.7)',
-                          fontSize: '12px',
-                          fontStyle: 'italic'
-                        }}>
-                          No sensors assigned
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
+                  
+                 );
+          })}  
+              
             {/* אזור לחדרים ללא אזור מוגדר */}
             {rooms.filter(room => !room.area_name).length > 0 && (
               <div
@@ -804,25 +1127,46 @@ const Dashboard = ({ user, onLogout }) => {
                 }}
               >
                 {user.role === 'admin' && (
-                  <button
-                    onClick={() => handleDeleteSensor(sensor.id)}
-                    style={{
-                      position: 'absolute',
-                      top: '5px',
-                      right: '5px',
-                      background: 'rgba(0,0,0,0.3)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '24px',
-                      height: '24px',
-                      cursor: 'pointer',
-                      fontSize: '12px'
-                    }}
-                    title="Delete Sensor"
-                  >
-                    ✕
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleEditSensor(sensor)}
+                      style={{
+                        position: 'absolute',
+                        top: '5px',
+                        left: '5px',
+                        background: 'rgba(33,150,243,0.8)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                      title="Edit Sensor"
+                    >
+                      ✎
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSensor(sensor.id)}
+                      style={{
+                        position: 'absolute',
+                        top: '5px',
+                        right: '5px',
+                        background: 'rgba(0,0,0,0.3)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                      title="Delete Sensor"
+                    >
+                      ✕
+                    </button>
+                  </>
                 )}
                 📡 {sensor.id} - {sensor.status}
                 <br />
@@ -849,7 +1193,8 @@ const Dashboard = ({ user, onLogout }) => {
                   textAlign: 'center'
                 }}
               >
-                🏠 {room.id} - {room.description}
+                🏠 {room.id} - {room.description} <br />
+                <span style={{fontSize: '12px', color: '#eee'}}>Floor: {room.floor}</span>
               </div>
             ))}
           </div>
@@ -895,6 +1240,17 @@ const Dashboard = ({ user, onLogout }) => {
         onClose={() => setShowAddModal(false)}
         onSave={handleAddSensor}
         rooms={rooms}
+        sensors={sensors}
+      />
+
+      {/* Edit Sensor Modal */}
+      <EditSensorModal
+        isOpen={!!editSensor}
+        onClose={() => setEditSensor(null)}
+        onSave={handleUpdateSensor}
+        sensor={editSensor}
+        rooms={rooms}
+        sensors={sensors}
       />
     </div>
   );

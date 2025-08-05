@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import MapViewer from '../MapViewer/MapViewer';
+import AddSensorModal from './AddSensorModal';
+import EditSensorModal from './EditSensorModal';
 
 const Dashboard = ({ user, onLogout }) => {
   const [sensors, setSensors] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [areas, setAreas] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editSensor, setEditSensor] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -46,14 +49,47 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handleAddSensor = async (newSensor) => {
+    // פונקציה להוספת חיישן חדש
+  };
+
+  const handleUpdateSensor = async (updatedSensor) => {
+    // פונקציה לעדכון חיישן קיים
+  };
+
   return (
     <div className="dashboard">
       <Header user={user} onLogout={onLogout} />
       <main className="dashboard-main">
         <MapViewer user={user} />
       </main>
+
+      <AddSensorModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSave={handleAddSensor}
+        rooms={rooms}
+        sensors={sensors} // הוסיפי שורה זו
+      />
+
+      <EditSensorModal
+        isOpen={!!editSensor}
+        onClose={() => setEditSensor(null)}
+        onSave={handleUpdateSensor}
+        sensor={editSensor}
+        rooms={rooms}
+        sensors={sensors} // הוסיפי שורה זו
+      />
     </div>
   );
+};
+
+const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
+  // ...existing code...
+};
+
+const EditSensorModal = ({ isOpen, onClose, onSave, sensor, rooms, sensors }) => {
+  // ...existing code...
 };
 
 export default Dashboard;
