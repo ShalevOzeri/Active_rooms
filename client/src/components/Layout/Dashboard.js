@@ -9,6 +9,7 @@ const Dashboard = ({ user, onLogout }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  
 
   useEffect(() => {
     fetchData();

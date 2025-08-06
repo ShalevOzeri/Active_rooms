@@ -232,6 +232,7 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
             <select
               value={sensorData.room_id}
               onChange={(e) => setSensorData({...sensorData, room_id: e.target.value})}
+              
               style={{
                 width: '100%',
                 padding: '8px 12px',
@@ -241,11 +242,14 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
               }}
             >
               <option value="">Select Room (Optional)</option>
-              {rooms.map(room => (
-                <option key={room.id} value={room.id}>
-                  {room.room_name} - {room.description}
-                </option>
-              ))}
+              {rooms
+              .filter(room => !sensors.some(sensor => sensor.room_id === room.id))
+              .map(room => (
+              <option key={room.id} value={room.id}>
+              {room.room_name} ({room.area_name || 'Unknown'})
+              </option>
+            ))}
+
             </select>
           </div>
 
@@ -585,21 +589,39 @@ const Dashboard = ({ user, onLogout }) => {
   const [selectedSensor, setSelectedSensor] = useState(null);
   const [showMap, setShowMap] = useState(true);
   const [editSensor, setEditSensor] = useState(null);
+  const [allowedBounds, setAllowedBounds] = useState({
+    xMin: 0,
+    xMax: 800,
+    yMin: 0,
+    yMax: 600,
+  });
 
   const getFullRoomLabel = (roomId) => {
     const room = rooms.find(r => r.id === roomId);
     if (!room) return 'N/A';
       return `${room.room_name} (${room.area || 'Unknown'})`;
   };
+  {/* Define area bounds for sensor placement on the map */}
+    const areaBounds = {
+    1: { xMin: 50,  xMax: 150, yMin: 40,  yMax: 120 },
+    2: { xMin: 160, xMax: 240, yMin: 40,  yMax: 120 },
+    3: { xMin: 50,  xMax: 140, yMin: 160, yMax: 240 },
+    4: { xMin: 160, xMax: 240, yMin: 160, yMax: 240 },
+    5: { xMin: 310, xMax: 440, yMin: 280, yMax: 400 },
+    6: { xMin: 500, xMax: 620, yMin: 270, yMax: 370 },
+    7: { xMin: 630, xMax: 770, yMin: 270, yMax: 390 },
+    8: { xMin: 310, xMax: 420, yMin: 460, yMax: 580 },
 
-  const getRoomName = (roomId) => {
+  };
+
+  const getRoomArea = (roomId) => {
     const room = rooms.find(r => r.id === roomId);
-    return room ? room.room_name : 'N/A';
+    return room?.area || null; // return a number
   };
 
   useEffect(() => {
     fetchData();
-  }, [user]);
+    }, [user]);
 
   const fetchData = async () => {
     try {
@@ -628,6 +650,8 @@ const Dashboard = ({ user, onLogout }) => {
   const handleAddSensor = async (sensorData) => {
     try {
       setLoading(true);
+      console.log("🛰️ שולחת את הסנסור:", sensorData);
+      
       const response = await fetch('http://localhost:3000/api/sensors', {
         method: 'POST',
         headers: {
@@ -1181,7 +1205,6 @@ const Dashboard = ({ user, onLogout }) => {
                 )}
                 📡 {sensor.id} - {sensor.status}
                 <br />
-            {/*<small>Room: {getRoomName(sensor.room_id)}</small>*/}
                 <small>Room: {getFullRoomLabel(sensor.room_id)}</small>
                 <br />
                 <small>Position: ({sensor.x}, {sensor.y})</small>
@@ -1214,7 +1237,7 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
         </div>
 
-        {/* 🗺️ המפה עברה לכאן - תחתית הדשבורד */}
+        {/* המפה עברה לכאן - תחתית הדשבורד */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
