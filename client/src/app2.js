@@ -586,12 +586,6 @@ const Dashboard = ({ user, onLogout }) => {
   const [showMap, setShowMap] = useState(true);
   const [editSensor, setEditSensor] = useState(null);
 
-  const getFullRoomLabel = (roomId) => {
-    const room = rooms.find(r => r.id === roomId);
-    if (!room) return 'N/A';
-      return `${room.room_name} (${room.area || 'Unknown'})`;
-  };
-
   const getRoomName = (roomId) => {
     const room = rooms.find(r => r.id === roomId);
     return room ? room.room_name : 'N/A';
@@ -1181,8 +1175,7 @@ const Dashboard = ({ user, onLogout }) => {
                 )}
                 📡 {sensor.id} - {sensor.status}
                 <br />
-            {/*<small>Room: {getRoomName(sensor.room_id)}</small>*/}
-                <small>Room: {getFullRoomLabel(sensor.room_id)}</small>
+                <small>Room: {getRoomName(sensor.room_id)}</small>
                 <br />
                 <small>Position: ({sensor.x}, {sensor.y})</small>
               </div>
