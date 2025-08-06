@@ -102,6 +102,7 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
               sensor={sensor}
               position={position}
               onClick={onSensorClick}
+              rooms={rooms}
             />
           );
         })}

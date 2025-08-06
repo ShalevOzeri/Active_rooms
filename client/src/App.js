@@ -154,7 +154,7 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
         <h3 style={{ margin: '0 0 20px 0', color: '#333' }}>➕ Add New Sensor</h3>
         
         <form onSubmit={handleSubmit}>
-          {/* Sensor ID */}
+       //   {/* Sensor ID */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Sensor ID: <span style={{ color: 'red' }}>*</span>
@@ -243,7 +243,7 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
               <option value="">Select Room (Optional)</option>
               {rooms.map(room => (
                 <option key={room.id} value={room.id}>
-                  {room.id} - {room.description}
+                  {room.room_name} - {room.description}
                 </option>
               ))}
             </select>
@@ -494,7 +494,7 @@ const EditSensorModal = ({ isOpen, onClose, onSave, sensor, rooms, sensors }) =>
               <option value="">Select Room (Optional)</option>
               {rooms.map(room => (
                 <option key={room.id} value={room.id}>
-                  {room.id} - {room.description}
+                  {room.room_name} - {room.description}
                 </option>
               ))}
             </select>
@@ -585,6 +585,11 @@ const Dashboard = ({ user, onLogout }) => {
   const [selectedSensor, setSelectedSensor] = useState(null);
   const [showMap, setShowMap] = useState(true);
   const [editSensor, setEditSensor] = useState(null);
+
+  const getRoomName = (roomId) => {
+    const room = rooms.find(r => r.id === roomId);
+    return room ? room.room_name : 'N/A';
+  };
 
   useEffect(() => {
     fetchData();
@@ -803,7 +808,7 @@ const Dashboard = ({ user, onLogout }) => {
         {/* Areas Section */}
         <div style={{background: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px'}}>
           <h2>Areas Overview</h2>
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px'}}>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px',justifyContent: 'start',direction: 'ltr' }}>
             {/* קבל רשימה ייחודית של אזורים */}
             {[...new Set(rooms.map(room => room.area_name).filter(Boolean))]
               .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
@@ -886,7 +891,7 @@ const Dashboard = ({ user, onLogout }) => {
                       }}>
                         {areaRooms.map(room => (
                           <span
-                            key={room.id}
+                            key={room.room_name}
                             style={{
                               background: 'rgba(255,255,255,0.2)',
                               padding: '4px 8px',
@@ -895,7 +900,7 @@ const Dashboard = ({ user, onLogout }) => {
                               border: '1px solid rgba(255,255,255,0.3)'
                             }}
                           >
-                            {room.id}
+                            {room.room_name}
                           </span>
                         ))}
                       </div>
@@ -953,7 +958,7 @@ const Dashboard = ({ user, onLogout }) => {
                                 .filter(room => room.floor === floor)
                                 .map(room => (
                                   <span
-                                    key={room.id}
+                                    key={room.room_name}
                                     style={{
                                       background: 'rgba(255,255,255,0.2)',
                                       padding: '4px 8px',
@@ -963,7 +968,7 @@ const Dashboard = ({ user, onLogout }) => {
                                       marginRight: '4px'
                                     }}
                                   >
-                                    {room.id}
+                                    {room.room_name}
                                   </span>
                                 ))}
                             </div>
@@ -1055,7 +1060,7 @@ const Dashboard = ({ user, onLogout }) => {
                   }}>
                     {rooms.filter(room => !room.area_name).map(room => (
                       <span
-                        key={room.id}
+                        key={room.room_name}
                         style={{
                           background: 'rgba(255,255,255,0.2)',
                           padding: '4px 8px',
@@ -1064,7 +1069,7 @@ const Dashboard = ({ user, onLogout }) => {
                           border: '1px solid rgba(255,255,255,0.3)'
                         }}
                       >
-                        {room.id}
+                        {room.room_name}
                       </span>
                     ))}
                   </div>
@@ -1170,7 +1175,7 @@ const Dashboard = ({ user, onLogout }) => {
                 )}
                 📡 {sensor.id} - {sensor.status}
                 <br />
-                <small>Room: {sensor.room_id || 'N/A'}</small>
+                <small>Room: {getRoomName(sensor.room_id)}</small>
                 <br />
                 <small>Position: ({sensor.x}, {sensor.y})</small>
               </div>
@@ -1184,7 +1189,7 @@ const Dashboard = ({ user, onLogout }) => {
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px'}}>
             {rooms.map(room => (
               <div
-                key={room.id}
+                key={room.room_name}
                 style={{
                   padding: '15px',
                   borderRadius: '8px',
@@ -1193,8 +1198,10 @@ const Dashboard = ({ user, onLogout }) => {
                   textAlign: 'center'
                 }}
               >
-                🏠 {room.id} - {room.description} <br />
-                <span style={{fontSize: '12px', color: '#eee'}}>Floor: {room.floor}</span>
+                🏠 {room.room_name} - {room.description} <br />
+                <span style={{fontSize: '12px', color: '#eee'}}>Floor: {room.floor}</span> <br />
+                <span style={{fontSize: '12px'}}> 🏢  {room.area_name || 'N/A'}</span>
+
               </div>
             ))}
           </div>
@@ -1299,4 +1306,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;  

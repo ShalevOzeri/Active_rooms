@@ -64,7 +64,7 @@ CREATE TABLE `areas` (
 
 LOCK TABLES `areas` WRITE;
 /*!40000 ALTER TABLE `areas` DISABLE KEYS */;
-INSERT INTO `areas` VALUES ('1','building 1','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('2','building 2','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('3','building 3','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('4','building 4','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('45','building 1','Large open area for events','M10,10 L50,10 L50,50 L10,50 Z',10),('5','building 5','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('6','building 6','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('7','building 7','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('8','building 8','Default description','M0,0 L10,0 L10,10 L0,10 Z',10);
+INSERT INTO `areas` VALUES ('1','Building 1','Art building','M0,0 L10,0 L10,10 L0,10 Z',10),('2','Building 2','Medical building','M0,0 L10,0 L10,10 L0,10 Z',10),('3','Building 3','Computer Science Building','M0,0 L10,0 L10,10 L0,10 Z',10),('4','Building 4','Industrial Engineering and Management Building','M0,0 L10,0 L10,10 L0,10 Z',10),('5','Building 5','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('6','Building 6','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('7','Building 7','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('8','Building 8','Default description','M0,0 L10,0 L10,10 L0,10 Z',10);
 /*!40000 ALTER TABLE `areas` ENABLE KEYS */;
 UNLOCK TABLES;
 
