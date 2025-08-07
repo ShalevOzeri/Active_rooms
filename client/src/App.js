@@ -12,7 +12,7 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch('http://localhost:3001/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -635,11 +635,11 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       setLoading(true);
       
-      const roomsRes = await fetch('http://localhost:3000/api/rooms');
+      const roomsRes = await fetch('http://localhost:3001/api/rooms');
       const roomsData = await roomsRes.json();
       if (roomsData.success) setRooms(roomsData.data);
 
-      const sensorsRes = await fetch('http://localhost:3000/api/sensors', {
+      const sensorsRes = await fetch('http://localhost:3001/api/sensors', {
         headers: {
           'username': user.credentials.username,
           'password': user.credentials.password
@@ -660,7 +660,7 @@ const Dashboard = ({ user, onLogout }) => {
       setLoading(true);
       console.log("🛰️ שולחת את הסנסור:", sensorData);
       
-      const response = await fetch('http://localhost:3000/api/sensors', {
+      const response = await fetch('http://localhost:3001/api/sensors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -689,7 +689,7 @@ const Dashboard = ({ user, onLogout }) => {
   const handleUpdateSensor = async (sensorData) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/sensors/${sensorData.id}`, {
+      const response = await fetch(`http://localhost:3001/api/sensors/${sensorData.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -720,7 +720,7 @@ const Dashboard = ({ user, onLogout }) => {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/sensors/${sensorId}`, {
+      const response = await fetch(`http://localhost:3001/api/sensors/${sensorId}`, {
         method: 'DELETE',
         headers: {
           'username': user.credentials.username,

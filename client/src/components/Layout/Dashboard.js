@@ -20,12 +20,12 @@ const Dashboard = ({ user, onLogout }) => {
       setLoading(true);
       
       // Fetch rooms
-      const roomsRes = await fetch('http://localhost:3000/api/rooms');
+      const roomsRes = await fetch('http://localhost:3001/api/rooms');
       const roomsData = await roomsRes.json();
       if (roomsData.success) setRooms(roomsData.data);
 
       // Fetch sensors
-      const sensorsRes = await fetch('http://localhost:3000/api/sensors', {
+      const sensorsRes = await fetch('http://localhost:3001/api/sensors', {
         headers: {
           'username': user.credentials.username,
           'password': user.credentials.password
@@ -35,7 +35,7 @@ const Dashboard = ({ user, onLogout }) => {
       if (sensorsData.success) setSensors(sensorsData.data);
 
       // Fetch all areas
-      const areasRes = await fetch('http://localhost:3000/api/areas');
+      const areasRes = await fetch('http://localhost:3001/api/areas');
       const areasData = await areasRes.json();
       if (areasData.success) setAreas(areasData.data);
 
