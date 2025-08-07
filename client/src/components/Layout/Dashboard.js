@@ -19,12 +19,12 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       setLoading(true);
       
-      // הבאת חדרים
+      // Fetch rooms
       const roomsRes = await fetch('http://localhost:3000/api/rooms');
       const roomsData = await roomsRes.json();
       if (roomsData.success) setRooms(roomsData.data);
 
-      // הבאת חיישנים
+      // Fetch sensors
       const sensorsRes = await fetch('http://localhost:3000/api/sensors', {
         headers: {
           'username': user.credentials.username,
@@ -34,7 +34,7 @@ const Dashboard = ({ user, onLogout }) => {
       const sensorsData = await sensorsRes.json();
       if (sensorsData.success) setSensors(sensorsData.data);
 
-      // הבאת כל האזורים
+      // Fetch all areas
       const areasRes = await fetch('http://localhost:3000/api/areas');
       const areasData = await areasRes.json();
       if (areasData.success) setAreas(areasData.data);

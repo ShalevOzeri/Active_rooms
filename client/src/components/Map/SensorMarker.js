@@ -1,7 +1,7 @@
 /*import React from 'react';
 
 const SensorMarker = ({ sensor, position, onClick, rooms }) => {
-  // קבלת צבע החיישן לפי סטטוס
+  // Get sensor color by status
   const getSensorColor = (status) => {
     switch (status) {
       case 'available': return '#4CAF50';
@@ -12,7 +12,7 @@ const SensorMarker = ({ sensor, position, onClick, rooms }) => {
     }
   };
 
-  // קבלת אייקון החיישן לפי סטטוס
+  // Get sensor icon by status
   const getSensorIcon = (status) => {
     switch (status) {
       case 'available': return '✅';
@@ -74,7 +74,7 @@ export default SensorMarker;*/
 import React from 'react';
 
 const SensorMarker = ({ sensor, position, onClick, rooms }) => {
-  // קבלת צבע החיישן לפי סטטוס
+  // Get sensor color by status
   const getSensorColor = (status) => {
     switch (status) {
       case 'available': return '#4CAF50';
@@ -85,7 +85,7 @@ const SensorMarker = ({ sensor, position, onClick, rooms }) => {
     }
   };
 
-  // קבלת אייקון החיישן לפי סטטוס
+  // Get sensor icon by status
   const getSensorIcon = (status) => {
     switch (status) {
       case 'available': return '✅';
@@ -96,7 +96,7 @@ const SensorMarker = ({ sensor, position, onClick, rooms }) => {
     }
   };
 
-  // קבלת שם החדר לפי room_id
+  // Get room name by room_id
   const getRoomName = (roomId) => {
     const room = rooms?.find(r => r.id === roomId);
     return room ? room.room_name : 'N/A';

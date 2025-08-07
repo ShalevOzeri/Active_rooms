@@ -78,10 +78,36 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
   });
   const [errors, setErrors] = useState({});
 
+  // Function to handle room selection change in Add Sensor modal
+  const handleRoomChangeAdd = (e) => {
+    const selectedRoomId = e.target.value;
+    
+    if (selectedRoomId) {
+      // Find the selected room and get its coordinates
+      const selectedRoom = rooms.find(room => room.id === selectedRoomId);
+      
+      if (selectedRoom && selectedRoom.x !== null && selectedRoom.y !== null) {
+        // Update sensor data with room coordinates
+        setSensorData({
+          ...sensorData, 
+          room_id: selectedRoomId,
+          x: selectedRoom.x,
+          y: selectedRoom.y
+        });
+      } else {
+        // Just update room_id if room has no coordinates
+        setSensorData({...sensorData, room_id: selectedRoomId});
+      }
+    } else {
+      // No room selected
+      setSensorData({...sensorData, room_id: selectedRoomId});
+    }
+  };
+
   const validateData = () => {
     const newErrors = {};
 
-    // בדיקת ID
+    // ID validation
     if (!sensorData.id) {
       newErrors.id = 'Sensor ID is required';
     } else if (!/^S\d{3}$/.test(sensorData.id)) {
@@ -90,16 +116,9 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
       newErrors.id = 'Sensor ID already exists';
     }
 
-    // בדיקת X
-    const x = parseInt(sensorData.x);
-    if (isNaN(x) || x < 0 || x > 800) {
-      newErrors.x = 'X must be between 0-800';
-    }
-
-    // בדיקת Y
-    const y = parseInt(sensorData.y);
-    if (isNaN(y) || y < 0 || y > 600) {
-      newErrors.y = 'Y must be between 0-600';
+    // Room validation
+    if (!sensorData.room_id) {
+      newErrors.room_id = 'Room selection is required';
     }
 
     setErrors(newErrors);
@@ -110,11 +129,12 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
     e.preventDefault();
     
     if (validateData()) {
-      // המר למספרים לפני שליחה
+      // Get coordinates from selected room
+      const selectedRoom = rooms.find(room => room.id === sensorData.room_id);
       const dataToSend = {
         ...sensorData,
-        x: parseInt(sensorData.x),
-        y: parseInt(sensorData.y)
+        x: selectedRoom ? selectedRoom.x : 0,
+        y: selectedRoom ? selectedRoom.y : 0
       };
       
       onSave(dataToSend);
@@ -176,63 +196,14 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
             {errors.id && <small style={{ color: '#f44336' }}>{errors.id}</small>}
           </div>
 
-          {/* Coordinates */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                X Position: <span style={{ color: 'red' }}>*</span>
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="800"
-                value={sensorData.x}
-                onChange={(e) => setSensorData({...sensorData, x: e.target.value})}
-                placeholder="0-800"
-                required
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: `2px solid ${errors.x ? '#f44336' : '#ddd'}`,
-                  borderRadius: '6px',
-                  fontSize: '14px'
-                }}
-              />
-              {errors.x && <small style={{ color: '#f44336' }}>{errors.x}</small>}
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                Y Position: <span style={{ color: 'red' }}>*</span>
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="600"
-                value={sensorData.y}
-                onChange={(e) => setSensorData({...sensorData, y: e.target.value})}
-                placeholder="0-600"
-                required
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: `2px solid ${errors.y ? '#f44336' : '#ddd'}`,
-                  borderRadius: '6px',
-                  fontSize: '14px'
-                }}
-              />
-              {errors.y && <small style={{ color: '#f44336' }}>{errors.y}</small>}
-            </div>
-          </div>
-
           {/* Room Selection */}
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-              Room:
+              Room: <span style={{ color: 'red' }}>*</span>
             </label>
             <select
               value={sensorData.room_id}
-              onChange={(e) => setSensorData({...sensorData, room_id: e.target.value})}
-              
+              onChange={handleRoomChangeAdd}
               style={{
                 width: '100%',
                 padding: '8px 12px',
@@ -241,16 +212,21 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
                 fontSize: '14px'
               }}
             >
-              <option value="">Select Room (Optional)</option>
-              {rooms
-              .filter(room => !sensors.some(sensor => sensor.room_id === room.id))
-              .map(room => (
-              <option key={room.id} value={room.id}>
-              {room.room_name} ({room.area_name || 'Unknown'})
-              </option>
-            ))}
-
+              <option value="">Select Room *</option>
+              {rooms.map(room => (
+                <option key={room.id} value={room.id}>
+                  {room.room_name} - {room.description}
+                  {room.x !== null && room.y !== null ? ` (${room.x}, ${room.y})` : ' (No coords)'}
+                  {sensors.some(sensor => sensor.room_id === room.id) ? ' [Occupied]' : ''}
+                </option>
+              ))}
             </select>
+            {sensorData.room_id && (
+              <small style={{ color: '#666', fontSize: '12px', marginTop: '5px', display: 'block' }}>
+                💡 Coordinates automatically updated from selected room
+              </small>
+            )}
+            {errors.room_id && <span style={{ color: 'red', fontSize: '12px' }}>{errors.room_id}</span>}
           </div>
 
           {/* Status */}
@@ -335,23 +311,49 @@ const EditSensorModal = ({ isOpen, onClose, onSave, sensor, rooms, sensors }) =>
     setSensorData(sensor || {});
   }, [sensor]);
 
+  // Function to handle room selection change
+  const handleRoomChange = (e) => {
+    const selectedRoomId = e.target.value;
+    
+    if (selectedRoomId) {
+      // Find the selected room and get its coordinates
+      const selectedRoom = rooms.find(room => room.id === selectedRoomId);
+      
+      if (selectedRoom && selectedRoom.x !== null && selectedRoom.y !== null) {
+        // Update sensor data with room coordinates
+        setSensorData({
+          ...sensorData, 
+          room_id: selectedRoomId,
+          x: selectedRoom.x,
+          y: selectedRoom.y
+        });
+      } else {
+        // Just update room_id if room has no coordinates
+        setSensorData({...sensorData, room_id: selectedRoomId});
+      }
+    } else {
+      // No room selected
+      setSensorData({...sensorData, room_id: selectedRoomId});
+    }
+  };
+
   const validateData = () => {
     const newErrors = {};
     
-    // בדיקת ID
+    // ID validation
     if (!sensorData.id.trim()) {
       newErrors.id = 'Sensor ID is required';
     } else if (!/^S\d{3}$/.test(sensorData.id)) {
       newErrors.id = 'ID format should be S001, S002, etc.';
     }
     
-    // בדיקת X
+    // X validation
     const x = parseInt(sensorData.x);
     if (isNaN(x) || x < 0 || x > 800) {
       newErrors.x = 'X must be between 0-800';
     }
     
-    // בדיקת Y
+    // Y validation
     const y = parseInt(sensorData.y);
     if (isNaN(y) || y < 0 || y > 600) {
       newErrors.y = 'Y must be between 0-600';
@@ -365,7 +367,7 @@ const EditSensorModal = ({ isOpen, onClose, onSave, sensor, rooms, sensors }) =>
     e.preventDefault();
     
     if (validateData()) {
-      // המר למספרים לפני שליחה
+      // Convert to numbers before sending
       const dataToSend = {
         ...sensorData,
         x: parseInt(sensorData.x),
@@ -486,7 +488,7 @@ const EditSensorModal = ({ isOpen, onClose, onSave, sensor, rooms, sensors }) =>
             </label>
             <select
               value={sensorData.room_id}
-              onChange={(e) => setSensorData({...sensorData, room_id: e.target.value})}
+              onChange={handleRoomChange}
               style={{
                 width: '100%',
                 padding: '8px 12px',
@@ -498,10 +500,16 @@ const EditSensorModal = ({ isOpen, onClose, onSave, sensor, rooms, sensors }) =>
               <option value="">Select Room (Optional)</option>
               {rooms.map(room => (
                 <option key={room.id} value={room.id}>
-                  {room.room_name} - {room.description}
+                  {room.room_name} - {room.description} 
+                  {room.x !== null && room.y !== null ? ` (${room.x}, ${room.y})` : ' (No coords)'}
                 </option>
               ))}
             </select>
+            {sensorData.room_id && (
+              <small style={{ color: '#666', fontSize: '12px', marginTop: '5px', display: 'block' }}>
+                💡 Coordinates automatically updated from selected room
+              </small>
+            )}
           </div>
 
           {/* Status */}
@@ -743,7 +751,7 @@ const Dashboard = ({ user, onLogout }) => {
     }
   }, [message]);
 
-  // הוסף פונקציה לטיפול בלחיצה על חיישן במפה
+  // Add function to handle sensor click on map
   const handleSensorClick = (sensor) => {
     setSelectedSensor(sensor);
     setMessage(`📡 Selected sensor: ${sensor.id} - Status: ${sensor.status} - Room: ${sensor.room_id || 'N/A'}`);
@@ -754,7 +762,7 @@ const Dashboard = ({ user, onLogout }) => {
     setShowEditModal(true);
   };
 
-  // לדוג' הצגת חדרים בבניין S001, קומה 2
+  // Example: Show rooms in building S001, floor 2
   const filteredRooms = rooms.filter(room => room.area_name === 'S001' && room.floor === 2);
 
   return (
@@ -839,7 +847,7 @@ const Dashboard = ({ user, onLogout }) => {
         <div style={{background: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px'}}>
           <h2>Areas Overview</h2>
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px',justifyContent: 'start',direction: 'ltr' }}>
-            {/* קבל רשימה ייחודית של אזורים */}
+            {/* Get unique list of areas */}
             {[...new Set(rooms.map(room => room.area_name).filter(Boolean))]
               .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
               .map(areaName => {
@@ -858,7 +866,7 @@ const Dashboard = ({ user, onLogout }) => {
                       boxShadow: '0 6px 12px rgba(0,0,0,0.1)'
                     }}
                   >
-                    {/* כותרת האזור */}
+                    {/* Area title */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -872,7 +880,7 @@ const Dashboard = ({ user, onLogout }) => {
                       </h3>
                     </div>
 
-                    {/* סטטיסטיקות האזור */}
+                    {/* Area statistics */}
                     <div style={{
                       display: 'grid',
                       gridTemplateColumns: 'repeat(3, 1fr)',
@@ -910,7 +918,7 @@ const Dashboard = ({ user, onLogout }) => {
                       </div>
                     </div>
 
-                    {/* רשימת חדרים */}
+                    {/* Rooms list */}
                     <div style={{marginBottom: '10px'}}>
                       <strong style={{fontSize: '14px'}}>🏠 Rooms:</strong>
                       <div style={{
@@ -936,7 +944,7 @@ const Dashboard = ({ user, onLogout }) => {
                       </div>
                     </div>
 
-                    {/* רשימת חיישנים */}
+                    {/* Sensors list */}
                     <div>
                       <strong style={{fontSize: '14px'}}>📡 Sensors:</strong>
                       <div style={{
@@ -975,7 +983,7 @@ const Dashboard = ({ user, onLogout }) => {
                       </div>
                     </div>
 
-                    {/* רשימת חדרים לפי קומה */}
+                    {/* Rooms list by floor */}
                     <div style={{marginBottom: '10px'}}>
                       <strong style={{fontSize: '14px'}}>🏠 Rooms by Floor:</strong>
                       <div style={{marginTop: '8px'}}>
@@ -1010,7 +1018,7 @@ const Dashboard = ({ user, onLogout }) => {
                  );
           })}  
               
-            {/* אזור לחדרים ללא אזור מוגדר */}
+            {/* Area for rooms without defined area */}
             {rooms.filter(room => !room.area_name).length > 0 && (
               <div
                 style={{
@@ -1237,7 +1245,7 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
         </div>
 
-        {/* המפה עברה לכאן - תחתית הדשבורד */}
+        {/* The map moved here - bottom of dashboard */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -1261,7 +1269,7 @@ const Dashboard = ({ user, onLogout }) => {
           </button>
         </div>
 
-        {/* רכיב המפה בתחתית */}
+        {/* Map component at the bottom */}
         {showMap && (
           <Map 
             sensors={sensors} 

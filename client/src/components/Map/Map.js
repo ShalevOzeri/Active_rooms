@@ -6,7 +6,7 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
   const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // טען את גודל התמונה
+  // Load image dimensions
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
@@ -16,11 +16,11 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
     img.src = '/hit-campus-map.jpg';
   }, []);
 
-  // פונקציה להמרת קואורדינטות חיישן לפיקסלים במפה
+  // Function to convert sensor coordinates to map pixels
   const getSensorPosition = (sensor, containerWidth, containerHeight) => {
     if (!mapDimensions.width || !mapDimensions.height) return { x: 0, y: 0 };
     
-    // המרה מקואורדינטות החיישן (0-800, 0-600) לגודל המפה בפועל
+    // Convert from sensor coordinates (0-800, 0-600) to actual map size
     const scaleX = containerWidth / 800;
     const scaleY = containerHeight / 600;
     
@@ -51,7 +51,7 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
       borderRadius: '8px',
       marginBottom: '20px'
     }}>
-      {/* כותרת ולגנדה */}
+      {/* Title and legend */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -62,7 +62,7 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
         <MapLegend />
       </div>
 
-      {/* המפה */}
+      {/* The map */}
       <div style={{
         position: 'relative',
         width: '100%',
@@ -73,7 +73,7 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
         overflow: 'hidden',
         boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
       }}>
-        {/* תמונת המפה */}
+        {/* Map image */}
         <img
           src="/hit-campus-map.jpg"
           alt="HIT Campus Map"
@@ -88,7 +88,7 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
           }}
         />
 
-        {/* החיישנים על המפה */}
+        {/* Sensors on the map */}
         {sensors.map(sensor => {
           const position = getSensorPosition(
             sensor,
@@ -107,7 +107,7 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
           );
         })}
 
-        {/* מידע נוסף על המפה */}
+        {/* Additional map information */}
         <div style={{
           position: 'absolute',
           bottom: '10px',
@@ -124,7 +124,7 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
         </div>
       </div>
 
-      {/* סטטיסטיקות מתחת למפה */}
+      {/* Statistics below the map */}
       <div style={{
         marginTop: '20px',
         display: 'grid',
