@@ -437,28 +437,6 @@ const EditSensorModal = ({ isOpen, onClose, onSave, sensor, rooms, sensors }) =>
           <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                X Position: <span style={{ color: 'red' }}>*</span>
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="800"
-                value={sensorData.x}
-                onChange={(e) => setSensorData({...sensorData, x: e.target.value})}
-                placeholder="0-800"
-                required
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: `2px solid ${errors.x ? '#f44336' : '#ddd'}`,
-                  borderRadius: '6px',
-                  fontSize: '14px'
-                }}
-              />
-              {errors.x && <small style={{ color: '#f44336' }}>{errors.x}</small>}
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                 Y Position: <span style={{ color: 'red' }}>*</span>
               </label>
               <input
@@ -478,6 +456,28 @@ const EditSensorModal = ({ isOpen, onClose, onSave, sensor, rooms, sensors }) =>
                 }}
               />
               {errors.y && <small style={{ color: '#f44336' }}>{errors.y}</small>}
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                X Position: <span style={{ color: 'red' }}>*</span>
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="800"
+                value={sensorData.x}
+                onChange={(e) => setSensorData({...sensorData, x: e.target.value})}
+                placeholder="0-800"
+                required
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: `2px solid ${errors.x ? '#f44336' : '#ddd'}`,
+                  borderRadius: '6px',
+                  fontSize: '14px'
+                }}
+              />
+              {errors.x && <small style={{ color: '#f44336' }}>{errors.x}</small>}
             </div>
           </div>
 
