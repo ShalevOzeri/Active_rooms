@@ -94,7 +94,7 @@ CREATE TABLE `rooms` (
 
 LOCK TABLES `rooms` WRITE;
 /*!40000 ALTER TABLE `rooms` DISABLE KEYS */;
-INSERT INTO `rooms` VALUES ('1','building 7 floor 0 room 112',7,690,380,4,401),('10','building 3 floor 2 room 201',3,100,190,2,201),('11','building 4 floor 2 room 101',4,240,180,1,101),('12','building 5 floor 2 room 220',5,300,370,2,220),('13','building 3 floor 3 room 401',3,100,220,4,401),('14','building 6 floor 0 room 101',6,300,400,0,101),('2','building 7 floor 0 room 102',7,650,440,0,102),('3','building 7 floor 0 room 103',7,660,430,1,103),('4','building 8 floor 0 room 201',8,230,500,0,201),('5','building 8 floor 0 room 300',8,300,450,0,300),('6','building 8 floor 0 room 201',8,290,490,0,201),('7','building 1 floor 1 room 201',1,100,50,2,201),('8','building 2 floor 1 room 201',2,90,100,2,201),('9','building 6 floor 1 room 216',6,520,390,2,216);
+INSERT INTO `rooms` VALUES ('1','building 7 floor 0 room 112',7,690,380,4,401),('10','building 3 floor 2 room 201',3,100,190,2,201),('11','building 4 floor 2 room 101',4,240,180,1,101),('12','building 5 floor 2 room 220',5,300,370,2,220),('13','building 3 floor 3 room 401',3,100,220,4,401),('14','building 6 floor 0 room 101',6,300,400,1,101),('2','building 7 floor 0 room 102',7,650,440,1,102),('3','building 7 floor 0 room 103',7,660,430,1,103),('4','building 8 floor 0 room 201',8,230,500,2,201),('5','building 8 floor 0 room 300',8,300,450,3,300),('6','building 8 floor 0 room 201',8,290,490,2,201),('7','building 1 floor 1 room 201',1,100,50,2,201),('8','building 2 floor 1 room 201',2,90,100,2,201),('9','building 6 floor 1 room 216',6,520,390,2,216);
 /*!40000 ALTER TABLE `rooms` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -166,4 +166,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-14 18:51:34
+-- Dump completed on 2025-08-14 18:56:49
