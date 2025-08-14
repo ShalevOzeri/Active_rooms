@@ -106,22 +106,6 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
             />
           );
         })}
-
-        {/* Additional map information */}
-        <div style={{
-          position: 'absolute',
-          bottom: '10px',
-          left: '10px',
-          background: 'rgba(0,0,0,0.7)',
-          color: 'white',
-          padding: '8px 12px',
-          borderRadius: '6px',
-          fontSize: '12px'
-        }}>
-          📡 {sensors.length} sensors • 
-          ✅ {sensors.filter(s => s.status === 'available').length} available • 
-          🔴 {sensors.filter(s => s.status === 'occupied').length} occupied
-        </div>
       </div>
 
       {/* Statistics below the map */}

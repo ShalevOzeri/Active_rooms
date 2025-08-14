@@ -4,8 +4,7 @@ const MapLegend = () => {
   const legendItems = [
     { color: '#4CAF50', label: 'Available' },
     { color: '#FF5722', label: 'Occupied' },
-    { color: '#FFC107', label: 'Error' },
-    { color: '#9E9E9E', label: 'Maintenance' }
+    { color: '#FFC107', label: 'Error' }
   ];
 
   return (
