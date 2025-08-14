@@ -4,7 +4,6 @@ const SensorsSection = ({
   sensors, 
   user, 
   loading, 
-  onRefresh, 
   onAddSensor, 
   onEditSensor, 
   onDeleteSensor,
@@ -24,38 +23,21 @@ const SensorsSection = ({
         marginBottom: '20px'
       }}>
         <h2>Sensors ({sensors.length})</h2>
-        <div style={{display: 'flex', gap: '10px'}}>
+        {user.role === 'admin' && (
           <button
-            onClick={onRefresh}
-            disabled={loading}
+            onClick={onAddSensor}
             style={{
               padding: '8px 16px',
-              background: '#2196F3',
+              background: '#4CAF50',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
-              cursor: loading ? 'not-allowed' : 'pointer'
+              cursor: 'pointer'
             }}
           >
-            {loading ? '🔄 Loading...' : '🔄 Refresh'}
+            ➕ Add Sensor
           </button>
-          
-          {user.role === 'admin' && (
-            <button
-              onClick={onAddSensor}
-              style={{
-                padding: '8px 16px',
-                background: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
-            >
-              ➕ Add Sensor
-            </button>
-          )}
-        </div>
+        )}
       </div>
       
       <div style={{

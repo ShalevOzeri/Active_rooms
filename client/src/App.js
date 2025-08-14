@@ -176,8 +176,6 @@ const Dashboard = ({ user, onLogout }) => {
         <SensorsSection 
           sensors={sensors}
           user={user}
-          loading={loading}
-          onRefresh={fetchData}
           onAddSensor={() => setShowAddModal(true)}
           onEditSensor={handleEditSensor}
           onDeleteSensor={handleDeleteSensor}
