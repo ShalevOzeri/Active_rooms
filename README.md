@@ -1,6 +1,6 @@
 # 🏠 Active Rooms Detection System
 
-מערכת זיהוי תפוסת חדרים בזמן אמת עם ממשק ניהול מתקדם.
+A real-time room occupancy detection system with an advanced management interface.
 
 ## 📁 Project Structure
 
