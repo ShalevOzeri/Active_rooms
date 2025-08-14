@@ -100,8 +100,8 @@ const validateSensorData = (data, isUpdate = false) => {
     }
     
     // Status validation
-    if (data.status !== undefined && !['available', 'occupied', 'error', 'maintenance'].includes(data.status)) {
-        errors.push('Status must be one of: available, occupied, error, maintenance');
+    if (data.status !== undefined && !['available', 'occupied', 'error'].includes(data.status)) {
+        errors.push('Status must be one of: available, occupied, error');
     }
     
     // Room ID validation
