@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import SensorMarker from './SensorMarker';
 import MapLegend from './MapLegend';
+import AddSensorDialog from './AddSensorDialog'; // import the dialog
 
-const Map = ({ sensors, rooms, onSensorClick }) => {
+const Map = ({ sensors, rooms, onSensorClick, onMapClick }) => {
   const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [addSensorPos, setAddSensorPos] = useState(null);
 
   // Load image dimensions
   useEffect(() => {
@@ -28,6 +30,21 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
       x: sensor.x * scaleX,
       y: sensor.y * scaleY
     };
+  };
+
+  // Handle map click (not on marker)
+  const handleMapClick = (e) => {
+    if (e.target.closest('.sensor-marker')) return;
+    const rect = e.target.getBoundingClientRect();
+    const x = Math.round((e.clientX - rect.left) * 800 / rect.width);
+    const y = Math.round((e.clientY - rect.top) * 600 / rect.height);
+    if (onMapClick) onMapClick(x, y);
+  };
+
+  // Handle dialog close or sensor add
+  const handleDialogClose = () => setAddSensorPos(null);
+  const handleAddSensor = (sensorData) => {
+    setAddSensorPos(null);
   };
 
   if (!imageLoaded) {
@@ -63,16 +80,19 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
       </div>
 
       {/* The map */}
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        border: '2px solid #ddd',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-      }}>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          border: '2px solid #ddd',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+        }}
+        onClick={handleMapClick}
+      >
         {/* Map image */}
         <img
           src="/hit-campus-map.jpg"
@@ -101,11 +121,22 @@ const Map = ({ sensors, rooms, onSensorClick }) => {
               key={sensor.id}
               sensor={sensor}
               position={position}
-              onClick={onSensorClick}
+              onClick={(e) => e.stopPropagation()}
               rooms={rooms}
+              className="sensor-marker"
             />
           );
         })}
+
+        {/* Add Sensor Dialog */}
+        {addSensorPos && (
+          <AddSensorDialog
+            position={addSensorPos}
+            rooms={rooms}
+            onAdd={handleAddSensor}
+            onCancel={handleDialogClose}
+          />
+        )}
       </div>
 
       {/* Statistics below the map */}

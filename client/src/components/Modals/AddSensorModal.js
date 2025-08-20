@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
+const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors, initialX, initialY }) => {
   const [sensorData, setSensorData] = useState({
     id: '',
     x: '',
@@ -9,6 +9,20 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
     status: 'available'
   });
   const [errors, setErrors] = useState({});
+
+  // Update x/y values when the modal opens with values from the map
+  useEffect(() => {
+    if (isOpen) {
+      setSensorData({
+        id: '',
+        x: initialX ?? '',
+        y: initialY ?? '',
+        room_id: '',
+        status: 'available'
+      });
+      setErrors({});
+    }
+  }, [isOpen, initialX, initialY]);
 
   // Function to handle room selection change in Add Sensor modal
   const handleRoomChangeAdd = (e) => {
@@ -48,28 +62,15 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
       newErrors.id = 'Sensor ID already exists';
     }
 
-    // Room validation
-    if (!sensorData.room_id) {
-      newErrors.room_id = 'Room selection is required';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (validateData()) {
-      // Get coordinates from selected room
-      const selectedRoom = rooms.find(room => room.id === sensorData.room_id);
-      const dataToSend = {
-        ...sensorData,
-        x: selectedRoom ? selectedRoom.x : 0,
-        y: selectedRoom ? selectedRoom.y : 0
-      };
-      
-      onSave(dataToSend);
+      onSave(sensorData);
       setSensorData({ id: '', x: '', y: '', room_id: '', status: 'available' });
       setErrors({});
     }
@@ -159,6 +160,50 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors }) => {
               </small>
             )}
             {errors.room_id && <span style={{ color: 'red', fontSize: '12px' }}>{errors.room_id}</span>}
+          </div>
+
+          {/* X coordinate */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              X:
+            </label>
+            <input
+              type="number"
+              value={sensorData.x}
+              onChange={e => setSensorData({ ...sensorData, x: e.target.value })}
+              required
+              min={0}
+              max={800}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '2px solid #ddd',
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
+          </div>
+
+          {/* Y coordinate */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Y:
+            </label>
+            <input
+              type="number"
+              value={sensorData.y}
+              onChange={e => setSensorData({ ...sensorData, y: e.target.value })}
+              required
+              min={0}
+              max={600}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '2px solid #ddd',
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
           </div>
 
           {/* Status */}

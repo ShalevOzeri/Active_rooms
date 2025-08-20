@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const SensorMarker = ({ sensor, position, onClick, rooms }) => {
@@ -30,7 +29,8 @@ const SensorMarker = ({ sensor, position, onClick, rooms }) => {
 
   return (
     <div
-      onClick={() => onClick && onClick(sensor)}
+      className="sensor-marker"
+      onClick={onClick} // Pass the event directly
       style={{
         position: 'absolute',
         left: position.x - 15,

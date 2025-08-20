@@ -30,6 +30,7 @@ const Dashboard = ({ user, onLogout }) => {
     yMin: 0,
     yMax: 600,
   });
+  const [addSensorXY, setAddSensorXY] = useState(null);
 
   const getFullRoomLabel = (roomId) => {
     const room = rooms.find(r => r.id === roomId);
@@ -250,6 +251,10 @@ const Dashboard = ({ user, onLogout }) => {
               sensors={sensors}
               rooms={rooms}
               onSensorClick={handleSensorClick}
+              onMapClick={(x, y) => {
+                setAddSensorXY({ x, y });
+                setShowAddModal(true);
+              }}
             />
           </div>
         )}
@@ -258,10 +263,20 @@ const Dashboard = ({ user, onLogout }) => {
       {/* Add Sensor Modal */}
       <AddSensorModal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onSave={handleAddSensor}
+        onClose={() => {
+          setShowAddModal(false);
+            setAddSensorXY(null);
+          }}
+          onSave={async (sensorData) => {
+            await handleAddSensor(sensorData); // Save to server
+            setShowAddModal(false);
+            setAddSensorXY(null);
+            fetchData(); // Refresh sensors from UI and database
+        }}
         rooms={rooms}
         sensors={sensors}
+        initialX={addSensorXY?.x}
+        initialY={addSensorXY?.y}
       />
 
       {/* Edit Sensor Modal */}
