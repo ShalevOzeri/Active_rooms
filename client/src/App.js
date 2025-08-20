@@ -251,10 +251,14 @@ const Dashboard = ({ user, onLogout }) => {
               sensors={sensors}
               rooms={rooms}
               onSensorClick={handleSensorClick}
-              onMapClick={(x, y) => {
-                setAddSensorXY({ x, y });
-                setShowAddModal(true);
-              }}
+              onMapClick={
+                user?.role === 'admin'
+                  ? (x, y) => {
+                      setAddSensorXY({ x, y });
+                        setShowAddModal(true);
+                      }
+                      : undefined // do not pass anything if not admin
+              }
             />
           </div>
         )}
