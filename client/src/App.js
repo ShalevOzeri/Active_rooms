@@ -144,7 +144,7 @@ const Dashboard = ({ user, onLogout }) => {
     }
   }, [message]);
 
-  // Add function to handle sensor click on map
+  // Add function to handle sensor click on the map
   const handleSensorClick = (sensor) => {
     setSelectedSensor(sensor);
     setMessage(`📡 Selected sensor: ${sensor.id} - Status: ${sensor.status} - Room: ${sensor.room_id || 'N/A'}`);
@@ -162,38 +162,98 @@ const Dashboard = ({ user, onLogout }) => {
     <div>
       <Header user={user} onLogout={onLogout} />
       
-      <main style={{padding: '20px'}}>
-        {/* Message Banner */}
-        <MessageBanner message={message} />
+      {/* Main layout: left side (all content), right side (map) */}
+      <div
+        style={{
+          display: 'flex',
+          gap: '24px',
+          padding: '24px',
+          minHeight: 'calc(100vh - 80px)',
+          alignItems: 'flex-start',
+          direction: 'ltr',
+        }}
+      >
+        {/* Left side: all content except the map */}
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            paddingLeft: '6px',
+            paddingRight: '6px',
+            boxSizing: 'border-box',
+            fontSize: '0.93em',
+            maxWidth: showMap ? 'calc(100vw - 940px)' : '100%',
+            transition: 'max-width 0.3s',
+          }}
+        >
+          {/* Show "Show Map" button if map is hidden */}
+          {!showMap && (
+            <button
+              style={{
+                alignSelf: 'flex-end',
+                marginBottom: '12px',
+                padding: '8px 18px',
+                background: '#2196F3',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                fontSize: '1em',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.07)'
+              }}
+              onClick={() => setShowMap(true)}
+            >
+              Show Map
+            </button>
+          )}
+          <MessageBanner message={message} />
+          <StatsCards sensors={sensors} rooms={rooms} />
+          <AreasOverview rooms={rooms} sensors={sensors} />
+          <SensorsSection
+            sensors={sensors}
+            user={user}
+            onAddSensor={() => setShowAddModal(true)}
+            onEditSensor={handleEditSensor}
+            onDeleteSensor={handleDeleteSensor}
+            getFullRoomLabel={getFullRoomLabel}
+          />
+          <RoomsSection rooms={rooms} />
+        </div>
 
-        {/* Stats Cards */}
-        <StatsCards sensors={sensors} rooms={rooms} />
-
-        {/* Areas Section */}
-        <AreasOverview rooms={rooms} sensors={sensors} />
-
-        {/* Sensors Section */}
-        <SensorsSection 
-          sensors={sensors}
-          user={user}
-          onAddSensor={() => setShowAddModal(true)}
-          onEditSensor={handleEditSensor}
-          onDeleteSensor={handleDeleteSensor}
-          getFullRoomLabel={getFullRoomLabel}
-        />
-
-        {/* Rooms Section */}
-        <RoomsSection rooms={rooms} />
-
-        {/* Map Section */}
-        <MapSection 
-          showMap={showMap}
-          onToggleMap={() => setShowMap(!showMap)}
-          sensors={sensors}
-          rooms={rooms}
-          onSensorClick={handleSensorClick}
-        />
-      </main>
+        {/* Right side: map only (show only if showMap is true) */}
+        {showMap && (
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '900px',
+              minWidth: '600px',
+              flexShrink: 0,
+              position: 'sticky',
+              top: '24px',
+              height: 'fit-content',
+              background: '#fff',
+              borderRadius: '12px',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <MapSection
+              showMap={showMap}
+              onToggleMap={() => setShowMap(false)}
+              sensors={sensors}
+              rooms={rooms}
+              onSensorClick={handleSensorClick}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Add Sensor Modal */}
       <AddSensorModal
@@ -260,4 +320,4 @@ function App() {
   );
 }
 
-export default App;  
+export default App;
