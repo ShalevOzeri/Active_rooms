@@ -1,28 +1,9 @@
 import React from 'react';
 
-const RoomsSection = ({ rooms, user, onAddRoom }) => {
+const RoomsSection = ({ rooms }) => {
   return (
     <div style={{background: 'white', padding: '20px', borderRadius: '8px'}}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2>Rooms ({rooms.length})</h2>
-        {user?.role === 'admin' && (
-          <button
-            onClick={onAddRoom}
-            style={{
-              background: '#43a047',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 6,
-              padding: '6px 16px',
-              fontWeight: 'bold',
-              fontSize: '1em',
-              cursor: 'pointer'
-            }}
-          >
-            ➕ Add Room
-          </button>
-        )}
-      </div>
+      <h2>Rooms ({rooms.length})</h2>
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px'}}>
         {rooms.map(room => (
           <div
@@ -35,9 +16,15 @@ const RoomsSection = ({ rooms, user, onAddRoom }) => {
               textAlign: 'center'
             }}
           >
-            🏠 {room.room_name} - {room.description} <br />
-            <span style={{fontSize: '12px', color: '#eee'}}>Floor: {room.floor}</span> <br />
-            <span style={{fontSize: '12px'}}> 🏢  {room.area_name || 'N/A'}</span>
+            <div style={{fontWeight: 'bold', fontSize: '1.1em', marginBottom: 6}}>
+              Room Num: {room.room_name}
+            </div>
+            <div style={{fontSize: '13px', marginBottom: 4}}>
+              Floor: {room.floor}
+            </div>
+            <div style={{fontSize: '13px'}}>
+              🏢 {room.area_name || 'N/A'}
+            </div>
           </div>
         ))}
       </div>
