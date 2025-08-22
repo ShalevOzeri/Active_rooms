@@ -73,63 +73,226 @@ const AddRoomModal = ({ isOpen, onClose, onSave, user }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.2)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'
-    }}>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }} onClick={onClose}>
       <div style={{
-        background: '#fff', borderRadius: 8, padding: 24, minWidth: 340, maxWidth: 400, boxShadow: '0 2px 12px rgba(0,0,0,0.13)'
-      }}>
-        <h2>Add New Room</h2>
+        background: 'white',
+        padding: '25px',
+        borderRadius: '12px',
+        maxWidth: '450px',
+        width: '90%',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.13)'
+      }} onClick={e => e.stopPropagation()}>
+        <h3 style={{ margin: '0 0 20px 0', color: '#333', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 28 }}>➕</span> Add New Room
+        </h3>
         <form onSubmit={handleSubmit}>
-          <div>
-            <label>Room ID*:<br />
-              <input name="id" value={form.id} onChange={handleChange} required maxLength={10} />
+          {/* Room ID */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Room ID: <span style={{ color: 'red' }}>*</span>
             </label>
+            <input
+              name="id"
+              value={form.id}
+              onChange={handleChange}
+              required
+              maxLength={10}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: `2px solid ${errors.find(e => e.toLowerCase().includes('room id')) ? '#f44336' : '#ddd'}`,
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
           </div>
-          <div>
-            <label>Description*:<br />
-              <input name="description" value={form.description} onChange={handleChange} required maxLength={255} />
+          {/* Description */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Description: <span style={{ color: 'red' }}>*</span>
             </label>
+            <input
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              required
+              maxLength={255}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: `2px solid ${errors.find(e => e.toLowerCase().includes('description')) ? '#f44336' : '#ddd'}`,
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
           </div>
-          <div>
-            <label>Room Number*:<br />
-              <input name="room_number" value={form.room_number} onChange={handleChange} required type="number" />
+          {/* Room Number */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Room Number: <span style={{ color: 'red' }}>*</span>
             </label>
+            <input
+              name="room_number"
+              value={form.room_number}
+              onChange={handleChange}
+              required
+              type="number"
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: `2px solid ${errors.find(e => e.toLowerCase().includes('room number')) ? '#f44336' : '#ddd'}`,
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
           </div>
-          <div>
-            <label>X*:<br />
-              <input name="x" value={form.x} onChange={handleChange} required type="number" min={0} max={800} />
+          {/* X */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              X: <span style={{ color: 'red' }}>*</span>
             </label>
+            <input
+              name="x"
+              value={form.x}
+              onChange={handleChange}
+              required
+              type="number"
+              min={0}
+              max={800}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: `2px solid ${errors.find(e => e.toLowerCase().includes('x coordinate')) ? '#f44336' : '#ddd'}`,
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
           </div>
-          <div>
-            <label>Y*:<br />
-              <input name="y" value={form.y} onChange={handleChange} required type="number" min={0} max={600} />
+          {/* Y */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Y: <span style={{ color: 'red' }}>*</span>
             </label>
+            <input
+              name="y"
+              value={form.y}
+              onChange={handleChange}
+              required
+              type="number"
+              min={0}
+              max={600}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: `2px solid ${errors.find(e => e.toLowerCase().includes('y coordinate')) ? '#f44336' : '#ddd'}`,
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
           </div>
-          <div>
-            <label>Floor:<br />
-              <input name="floor" value={form.floor} onChange={handleChange} type="number" min={0} max={100} />
+          {/* Floor */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Floor:
             </label>
+            <input
+              name="floor"
+              value={form.floor}
+              onChange={handleChange}
+              type="number"
+              min={0}
+              max={100}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '2px solid #ddd',
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            />
           </div>
-          <div>
-            <label>Area:<br />
-              <select name="area_id" value={form.area_id} onChange={handleChange}>
-                <option value="">-- None --</option>
-                {areas.map(area => (
-                  <option key={area.id} value={area.id}>{area.name}</option>
-                ))}
-              </select>
+          {/* Area */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Area:
             </label>
+            <select
+              name="area_id"
+              value={form.area_id}
+              onChange={handleChange}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '2px solid #ddd',
+                borderRadius: '6px',
+                fontSize: '14px'
+              }}
+            >
+              <option value="">-- None --</option>
+              {areas.map(area => (
+                <option key={area.id} value={area.id}>{area.name}</option>
+              ))}
+            </select>
           </div>
+          {/* Error messages */}
           {errors.length > 0 && (
-            <div style={{ color: 'red', margin: '8px 0' }}>
+            <div style={{ color: '#f44336', margin: '8px 0', fontSize: '13px' }}>
               {errors.map((err, i) => <div key={i}>{err}</div>)}
             </div>
           )}
-          <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
-            <button type="submit" style={{ background: '#2196F3', color: '#fff', border: 'none', borderRadius: 4, padding: '8px 18px', fontWeight: 'bold' }}>Save</button>
-            <button type="button" onClick={onClose} style={{ background: '#eee', border: 'none', borderRadius: 4, padding: '8px 18px' }}>Cancel</button>
+          {/* Helper */}
+          <div style={{
+            background: '#f0f8ff',
+            padding: '10px',
+            borderRadius: '6px',
+            marginBottom: '20px',
+            fontSize: '12px',
+            color: '#666'
+          }}>
+            💡 <strong>Tip:</strong> Map coordinates: X (0-800), Y (0-600). Top-left is (0,0), bottom-right is (800,600).
+          </div>
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                flex: 1,
+                padding: '10px',
+                background: '#f44336',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              style={{
+                flex: 1,
+                padding: '10px',
+                background: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Add Room
+            </button>
           </div>
         </form>
       </div>
