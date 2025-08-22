@@ -177,101 +177,173 @@ const AreasOverview = ({ rooms, sensors }) => {
       })}  
           
         {/* Area for rooms without defined area */}
-        {rooms.filter(room => !room.area_name).length > 0 && (
-          <div
-            style={{
-              padding: '20px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%)',
-              color: 'white',
-              boxShadow: '0 6px 12px rgba(0,0,0,0.1)'
-            }}
-          >
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '15px',
-              borderBottom: '2px solid rgba(255,255,255,0.3)',
-              paddingBottom: '10px'
-            }}>
-              <div style={{fontSize: '24px', marginRight: '10px'}}>❓</div>
-              <h3 style={{margin: 0, fontSize: '20px', fontWeight: 'bold'}}>
-                Unassigned Area
-              </h3>
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '10px',
-              marginBottom: '15px'
-            }}>
+        {rooms.filter(room => !room.area_name).length > 0 && (() => {
+          const unassignedRooms = rooms.filter(room => !room.area_name);
+          const unassignedSensors = sensors.filter(sensor =>
+            unassignedRooms.some(room => room.id === sensor.room_id)
+          );
+          return (
+            <div
+              style={{
+                padding: '20px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%)',
+                color: 'white',
+                boxShadow: '0 6px 12px rgba(0,0,0,0.1)'
+              }}
+            >
               <div style={{
-                background: 'rgba(255,255,255,0.2)',
-                padding: '10px',
-                borderRadius: '8px',
-                textAlign: 'center'
-              }}>
-                <div style={{fontSize: '20px', fontWeight: 'bold'}}>
-                  {rooms.filter(room => !room.area_name).length}
-                </div>
-                <div style={{fontSize: '12px', opacity: 0.9}}>Rooms</div>
-              </div>
-              <div style={{
-                background: 'rgba(255,255,255,0.2)',
-                padding: '10px',
-                borderRadius: '8px',
-                textAlign: 'center'
-              }}>
-                <div style={{fontSize: '20px', fontWeight: 'bold'}}>
-                  {sensors.filter(sensor => 
-                    rooms.filter(room => !room.area_name).some(room => room.id === sensor.room_id)
-                  ).length}
-                </div>
-                <div style={{fontSize: '12px', opacity: 0.9}}>Sensors</div>
-              </div>
-              <div style={{
-                background: 'rgba(255,255,255,0.2)',
-                padding: '10px',
-                borderRadius: '8px',
-                textAlign: 'center'
-              }}>
-                <div style={{fontSize: '20px', fontWeight: 'bold'}}>
-                  {sensors.filter(sensor => 
-                    rooms.filter(room => !room.area_name).some(room => room.id === sensor.room_id) &&
-                    sensor.status === 'available'
-                  ).length}
-                </div>
-                <div style={{fontSize: '12px', opacity: 0.9}}>Available</div>
-              </div>
-            </div>
-
-            <div style={{marginBottom: '10px'}}>
-              <strong style={{fontSize: '14px'}}>🏠 Rooms:</strong>
-              <div style={{
-                marginTop: '8px',
                 display: 'flex',
-                flexWrap: 'wrap',
-                gap: '5px'
+                alignItems: 'center',
+                marginBottom: '15px',
+                borderBottom: '2px solid rgba(255,255,255,0.3)',
+                paddingBottom: '10px'
               }}>
-                {rooms.filter(room => !room.area_name).map(room => (
-                  <span
-                    key={room.room_name}
-                    style={{
-                      background: 'rgba(255,255,255,0.2)',
-                      padding: '4px 8px',
-                      borderRadius: '12px',
+                <div style={{fontSize: '24px', marginRight: '10px'}}>❓</div>
+                <h3 style={{margin: 0, fontSize: '20px', fontWeight: 'bold'}}>
+                  Unassigned Area
+                </h3>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '10px',
+                marginBottom: '15px'
+              }}>
+                <div style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{fontSize: '20px', fontWeight: 'bold'}}>
+                    {unassignedRooms.length}
+                  </div>
+                  <div style={{fontSize: '12px', opacity: 0.9}}>Rooms</div>
+                </div>
+                <div style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{fontSize: '20px', fontWeight: 'bold'}}>
+                    {unassignedSensors.length}
+                  </div>
+                  <div style={{fontSize: '12px', opacity: 0.9}}>Sensors</div>
+                </div>
+                <div style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{fontSize: '20px', fontWeight: 'bold'}}>
+                    {unassignedSensors.filter(s => s.status === 'available').length}
+                  </div>
+                  <div style={{fontSize: '12px', opacity: 0.9}}>Available</div>
+                </div>
+              </div>
+
+              {/* Rooms list */}
+              <div style={{marginBottom: '10px'}}>
+                <strong style={{fontSize: '14px'}}>🏠 Rooms:</strong>
+                <div style={{
+                  marginTop: '8px',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '5px'
+                }}>
+                  {unassignedRooms.map(room => (
+                    <span
+                      key={room.room_name}
+                      style={{
+                        background: 'rgba(255,255,255,0.2)',
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        border: '1px solid rgba(255,255,255,0.3)'
+                      }}
+                    >
+                      {room.room_name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sensors list */}
+              <div>
+                <strong style={{fontSize: '14px'}}>📡 Sensors:</strong>
+                <div style={{
+                  marginTop: '8px',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '5px'
+                }}>
+                  {unassignedSensors.map(sensor => (
+                    <span
+                      key={sensor.id}
+                      style={{
+                        background: sensor.status === 'available' ? 'rgba(76, 175, 80, 0.8)' :
+                                   sensor.status === 'occupied' ? 'rgba(255, 87, 34, 0.8)' :
+                                   'rgba(255, 193, 7, 0.8)',
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                      }}
+                      title={`${sensor.id} - ${sensor.status}`}
+                    >
+                      {sensor.id}
+                    </span>
+                  ))}
+                  {unassignedSensors.length === 0 && (
+                    <span style={{
+                      color: 'rgba(255,255,255,0.7)',
                       fontSize: '12px',
-                      border: '1px solid rgba(255,255,255,0.3)'
-                    }}
-                  >
-                    {room.room_name}
-                  </span>
-                ))}
+                      fontStyle: 'italic'
+                    }}>
+                      No sensors assigned
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Rooms list by floor */}
+              <div style={{marginBottom: '10px'}}>
+                <strong style={{fontSize: '14px'}}>🏠 Rooms by Floor:</strong>
+                <div style={{marginTop: '8px'}}>
+                  {[...new Set(unassignedRooms.map(room => room.floor))]
+                    .sort((a, b) => a - b)
+                    .map(floor => (
+                      <div key={floor} style={{marginBottom: '6px'}}>
+                        <span style={{fontWeight: 'bold', color: '#ffd700'}}>Floor {floor}:</span>{' '}
+                        {unassignedRooms
+                          .filter(room => room.floor === floor)
+                          .map(room => (
+                            <span
+                              key={room.room_name}
+                              style={{
+                                background: 'rgba(255,255,255,0.2)',
+                                padding: '4px 8px',
+                                borderRadius: '12px',
+                                fontSize: '12px',
+                                border: '1px solid rgba(255,255,255,0.3)',
+                                marginRight: '4px'
+                              }}
+                            >
+                              {room.room_name}
+                            </span>
+                          ))}
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

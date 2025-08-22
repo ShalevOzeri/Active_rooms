@@ -260,6 +260,98 @@ app.get('/api/rooms', async (req, res) => {
     }
 });
 
+// --- Add Room (admin only) ---
+app.post('/api/rooms', authenticateUser, requireAdmin, async (req, res) => {
+    try {
+        const { id, description, room_number, x, y, floor, area_id } = req.body;
+
+        // Validation
+        const errors = [];
+        if (!id || typeof id !== 'string' || id.trim() === '')
+            errors.push('Room ID is required and must be a non-empty string');
+        else if (id.length > 10)
+            errors.push('Room ID must be 10 characters or less');
+        if (!description || typeof description !== 'string' || description.length < 2 || description.length > 255)
+            errors.push('Description is required (2-255 chars)');
+        if (!room_number || isNaN(room_number))
+            errors.push('Room number is required and must be a number');
+        if (x === undefined || y === undefined || isNaN(x) || isNaN(y))
+            errors.push('x and y coordinates are required and must be numbers');
+        if (x < 0 || x > 800 || y < 0 || y > 600)
+            errors.push('Coordinates must be within map bounds (x: 0-800, y: 0-600)');
+        if (floor !== undefined && floor !== null && floor !== '' && (isNaN(floor) || floor < 0 || floor > 100))
+            errors.push('Floor must be a valid number');
+        if (area_id !== undefined && area_id !== null && area_id !== '' && isNaN(area_id))
+            errors.push('Area ID must be a valid number');
+
+        // Check area exists if area_id provided
+        let areaIdToUse = null;
+        if (area_id !== undefined && area_id !== null && area_id !== '') {
+            const [areas] = await pool.execute('SELECT id FROM areas WHERE id = ?', [area_id]);
+            if (areas.length === 0) errors.push('Selected area does not exist');
+            else areaIdToUse = area_id;
+        }
+
+        // Room ID uniqueness
+        const [existingId] = await pool.execute('SELECT id FROM rooms WHERE id = ?', [id]);
+        if (existingId.length > 0)
+            errors.push('Room ID already exists');
+
+        // Room number uniqueness (per floor/area)
+        let whereClause = 'room_name = ?';
+        let params = [room_number];
+        if (floor !== undefined && floor !== null && floor !== '') {
+            whereClause += ' AND floor = ?';
+            params.push(floor);
+        }
+        if (areaIdToUse) {
+            whereClause += ' AND area = ?';
+            params.push(areaIdToUse);
+        }
+        const [existingRooms] = await pool.execute(
+            `SELECT id FROM rooms WHERE ${whereClause}`,
+            params
+        );
+        if (existingRooms.length > 0)
+            errors.push('Room number already exists for this floor/area');
+
+        if (errors.length > 0) {
+            return res.status(400).json({ success: false, message: 'Validation failed', errors });
+        }
+
+        await pool.execute(
+            `INSERT INTO rooms (id, description, area, x, y, floor, room_name) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                id,
+                description,
+                areaIdToUse,
+                x,
+                y,
+                floor !== undefined && floor !== null && floor !== '' ? floor : null,
+                room_number
+            ]
+        );
+
+        // Return the new room
+        const [roomRows] = await pool.execute(
+            `SELECT r.*, a.name as area_name FROM rooms r LEFT JOIN areas a ON r.area = a.id WHERE r.id = ?`,
+            [id]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Room added successfully',
+            data: roomRows[0]
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error adding room',
+            error: error.message
+        });
+    }
+});
+
 // === SENSORS API ===
 app.get('/api/sensors', authenticateUser, async (req, res) => {
     try {

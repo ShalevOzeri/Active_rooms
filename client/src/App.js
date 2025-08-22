@@ -11,6 +11,7 @@ import SensorsSection from './components/Sensors/SensorsSection';
 import MessageBanner from './components/Common/MessageBanner';
 import MapSection from './components/Map/MapSection';
 import apiService from './services/apiService';
+import AddRoomModal from './components/Modals/AddRoomModal';
 
 // Enhanced Dashboard Component with Admin Features
 const Dashboard = ({ user, onLogout }) => {
@@ -19,6 +20,7 @@ const Dashboard = ({ user, onLogout }) => {
   const [areas, setAreas] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddRoomModal, setShowAddRoomModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [selectedSensor, setSelectedSensor] = useState(null);
@@ -62,7 +64,6 @@ const Dashboard = ({ user, onLogout }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
       const roomsData = await apiService.fetchRooms();
       if (roomsData.success) setRooms(roomsData.data);
 
@@ -132,6 +133,25 @@ const Dashboard = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Error deleting sensor:', error);
       setMessage('❌ Error deleting sensor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- Add Room handler ---
+  const handleAddRoom = async (roomData) => {
+    try {
+      setLoading(true);
+      const data = await apiService.addRoom(user, roomData);
+      if (data.success) {
+        setMessage(`✅ Room added successfully!`);
+        setShowAddRoomModal(false);
+        fetchData();
+      } else {
+        setMessage(`❌ Error: ${data.message || (data.errors && data.errors.join(', '))}`);
+      }
+    } catch (error) {
+      setMessage('❌ Error adding room');
     } finally {
       setLoading(false);
     }
@@ -222,7 +242,11 @@ const Dashboard = ({ user, onLogout }) => {
             onDeleteSensor={handleDeleteSensor}
             getFullRoomLabel={getFullRoomLabel}
           />
-          <RoomsSection rooms={rooms} />
+          <RoomsSection
+            rooms={rooms}
+            user={user}
+            onAddRoom={() => setShowAddRoomModal(true)}
+          />
         </div>
 
         {/* Right side: map only (show only if showMap is true) */}
@@ -269,13 +293,13 @@ const Dashboard = ({ user, onLogout }) => {
         isOpen={showAddModal}
         onClose={() => {
           setShowAddModal(false);
-            setAddSensorXY(null);
-          }}
-          onSave={async (sensorData) => {
-            await handleAddSensor(sensorData); // Save to server
-            setShowAddModal(false);
-            setAddSensorXY(null);
-            fetchData(); // Refresh sensors from UI and database
+          setAddSensorXY(null);
+        }}
+        onSave={async (sensorData) => {
+          await handleAddSensor(sensorData); // Save to server
+          setShowAddModal(false);
+          setAddSensorXY(null);
+          fetchData(); // Refresh sensors from UI and database
         }}
         rooms={rooms}
         sensors={sensors}
@@ -291,6 +315,14 @@ const Dashboard = ({ user, onLogout }) => {
         sensor={editSensor}
         rooms={rooms}
         sensors={sensors}
+      />
+
+      {/* --- Add Room Modal --- */}
+      <AddRoomModal
+        isOpen={showAddRoomModal}
+        onClose={() => setShowAddRoomModal(false)}
+        onSave={handleAddRoom}
+        user={user}
       />
     </div>
   );

@@ -59,6 +59,24 @@ const apiService = {
     });
     const data = await response.json();
     return data;
+  },
+
+  // Fetch areas data
+  fetchAreas: async () => {
+    const response = await fetch(`${API_BASE_URL}/areas`);
+    const data = await response.json();
+    return data;
+  },
+
+  // Add new room
+  addRoom: async (user, roomData) => {
+    const response = await fetch(`${API_BASE_URL}/rooms`, {
+      method: 'POST',
+      headers: createAuthHeaders(user),
+      body: JSON.stringify(roomData)
+    });
+    const data = await response.json();
+    return data;
   }
 };
 

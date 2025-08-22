@@ -1,9 +1,28 @@
 import React from 'react';
 
-const RoomsSection = ({ rooms }) => {
+const RoomsSection = ({ rooms, user, onAddRoom }) => {
   return (
     <div style={{background: 'white', padding: '20px', borderRadius: '8px'}}>
-      <h2>Rooms ({rooms.length})</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h2>Rooms ({rooms.length})</h2>
+        {user?.role === 'admin' && (
+          <button
+            onClick={onAddRoom}
+            style={{
+              background: '#43a047',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              padding: '6px 16px',
+              fontWeight: 'bold',
+              fontSize: '1em',
+              cursor: 'pointer'
+            }}
+          >
+            ➕ Add Room
+          </button>
+        )}
+      </div>
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px'}}>
         {rooms.map(room => (
           <div
