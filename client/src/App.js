@@ -12,6 +12,7 @@ import MessageBanner from './components/Common/MessageBanner';
 import MapSection from './components/Map/MapSection';
 import apiService from './services/apiService';
 import AddRoomModal from './components/Modals/AddRoomModal';
+import EditRoomModal from './components/Modals/EditRoomModal';
 
 // Enhanced Dashboard Component with Admin Features
 const Dashboard = ({ user, onLogout }) => {
@@ -26,6 +27,7 @@ const Dashboard = ({ user, onLogout }) => {
   const [selectedSensor, setSelectedSensor] = useState(null);
   const [showMap, setShowMap] = useState(true);
   const [editSensor, setEditSensor] = useState(null);
+  const [editRoom, setEditRoom] = useState(null);
   const [allowedBounds, setAllowedBounds] = useState({
     xMin: 0,
     xMax: 800,
@@ -69,6 +71,10 @@ const Dashboard = ({ user, onLogout }) => {
 
       const sensorsData = await apiService.fetchSensors(user);
       if (sensorsData.success) setSensors(sensorsData.data);
+
+      // Fetch areas for edit modal
+      const areasData = await apiService.fetchAreas();
+      if (areasData.success) setAreas(areasData.data);
     } catch (error) {
       console.error('Error:', error);
       setMessage('Error loading data');
@@ -105,6 +111,7 @@ const Dashboard = ({ user, onLogout }) => {
       if (data.success) {
         setMessage(`✅ Sensor ${sensorData.id} updated successfully!`);
         setEditSensor(null);
+        // כאן מתבצע fetchData שמרענן את כל הסנסורים (וגם החדרים) מהשרת
         fetchData();
       } else {
         setMessage(`❌ Error: ${data.message}`);
@@ -146,12 +153,39 @@ const Dashboard = ({ user, onLogout }) => {
       if (data.success) {
         setMessage(`✅ Room added successfully!`);
         setShowAddRoomModal(false);
-        fetchData();
+        // עדכן את רשימת החדרים מיידית (ללא fetchData)
+        setRooms(prevRooms => {
+          // אם החדר כבר קיים (למשל עדכון), עדכן אותו, אחרת הוסף
+          if (prevRooms.some(r => r.id === data.data.id)) {
+            return prevRooms.map(r => r.id === data.data.id ? data.data : r);
+          }
+          return [...prevRooms, data.data];
+        });
       } else {
         setMessage(`❌ Error: ${data.message || (data.errors && data.errors.join(', '))}`);
       }
     } catch (error) {
       setMessage('❌ Error adding room');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- Update Room handler ---
+  const handleUpdateRoom = async (roomId, roomData) => {
+    setLoading(true);
+    try {
+      const data = await apiService.updateRoom(user, roomId, roomData);
+      if (data.success) {
+        setMessage(`✅ Room updated successfully!`);
+        setEditRoom(null);
+        // ודא ש-fetchData מחכה לסיום לפני סגירת המודאל
+        await fetchData();
+      } else {
+        setMessage(`❌ Error: ${data.message || (data.errors && data.errors.join(', '))}`);
+      }
+    } catch (error) {
+      setMessage('❌ Error updating room');
     } finally {
       setLoading(false);
     }
@@ -167,7 +201,8 @@ const Dashboard = ({ user, onLogout }) => {
       const data = await apiService.deleteRoom(user, roomId);
       if (data.success) {
         setMessage(`✅ Room ${roomId} deleted successfully!`);
-        fetchData();
+        // הסר את החדר מהרשימה מיידית (ללא fetchData)
+        setRooms(prevRooms => prevRooms.filter(r => r.id !== roomId));
       } else {
         setMessage(`❌ Error: ${data.message}`);
       }
@@ -268,6 +303,7 @@ const Dashboard = ({ user, onLogout }) => {
             user={user}
             onAddRoom={() => setShowAddRoomModal(true)}
             onDeleteRoom={handleDeleteRoom}
+            openEditModal={setEditRoom}
           />
         </div>
 
@@ -345,6 +381,15 @@ const Dashboard = ({ user, onLogout }) => {
         onClose={() => setShowAddRoomModal(false)}
         onSave={handleAddRoom}
         user={user}
+      />
+
+      <EditRoomModal
+        open={!!editRoom}
+        onClose={() => setEditRoom(null)}
+        room={editRoom}
+        areas={areas}
+        onSave={roomData => handleUpdateRoom(editRoom.id, roomData)}
+        user={user} // <-- add this line
       />
     </div>
   );

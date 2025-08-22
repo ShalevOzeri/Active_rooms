@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Add user and onDeleteRoom as props
-const RoomsSection = ({ rooms, user, onDeleteRoom, onAddRoom }) => {
+const RoomsSection = ({ rooms, user, onDeleteRoom, onAddRoom, openEditModal }) => {
   return (
     <div style={{background: 'white', padding: '20px', borderRadius: '8px'}}>
       <h2 style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -28,7 +28,7 @@ const RoomsSection = ({ rooms, user, onDeleteRoom, onAddRoom }) => {
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px'}}>
         {rooms.map(room => (
           <div
-            key={room.room_name}
+            key={room.id} // <-- use room.id as key
             style={{
               padding: '15px',
               borderRadius: '8px',
@@ -58,6 +58,32 @@ const RoomsSection = ({ rooms, user, onDeleteRoom, onAddRoom }) => {
                 title="Delete Room"
               >
                 ✕
+              </button>
+            )}
+            {/* Edit button for admin */}
+            {user?.role === 'admin' && (
+              <button
+                onClick={() => {
+                  // Debug: print room object
+                  console.log('Edit room clicked:', room);
+                  openEditModal && openEditModal(room);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '5px',
+                  left: '5px',
+                  background: '#0000004d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
+                  cursor: 'pointer',
+                  fontSize: '13px'
+                }}
+                title="Edit Room"
+              >
+                ✏️
               </button>
             )}
             <div style={{fontWeight: 'bold', fontSize: '1.1em', marginBottom: 6}}>

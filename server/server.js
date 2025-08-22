@@ -425,6 +425,99 @@ app.delete('/api/rooms/:id', authenticateUser, requireAdmin, async (req, res) =>
     }
 });
 
+// --- Update Room (admin only) ---
+app.put('/api/rooms/:id', authenticateUser, requireAdmin, async (req, res) => {
+    // Extract room ID from URL and fields from request body
+    const roomId = req.params.id;
+    const { room_name, floor, area, x, y } = req.body;
+
+    // Validation: collect errors for missing or invalid fields
+    const errors = [];
+    if (!roomId || typeof roomId !== 'string' || roomId.trim() === '')
+        errors.push('Room ID is required and must be a non-empty string');
+    // Room name: allow any non-empty value (string or number)
+    if (
+        room_name === undefined ||
+        room_name === null ||
+        (typeof room_name === 'string' && room_name.toString().trim() === '') ||
+        (typeof room_name === 'number' && room_name.toString().trim() === '')
+    )
+        errors.push('Room name is required and must be a non-empty string');
+    // Floor is optional
+    if (floor !== undefined && floor !== null && floor !== '' && isNaN(floor))
+        errors.push('Floor must be a number');
+    // Area is optional
+    if (area !== undefined && area !== null && area !== '') {
+        if (isNaN(area)) errors.push('Area must be a number');
+        else {
+            const [areas] = await pool.execute('SELECT id FROM areas WHERE id = ?', [area]);
+            if (areas.length === 0)
+                errors.push('Selected area does not exist');
+        }
+    }
+    // X/Y: must be numbers in range
+    if (
+        x === undefined ||
+        y === undefined ||
+        x === '' ||
+        y === '' ||
+        isNaN(x) ||
+        isNaN(y)
+    ) {
+        errors.push('x and y coordinates are required and must be numbers');
+    } else {
+        if (x < 0 || x > 800)
+            errors.push('X must be between 0 and 800');
+        if (y < 0 || y > 600)
+            errors.push('Y must be between 0 and 600');
+    }
+
+    // Check if room exists in the database
+    const [existingRooms] = await pool.execute('SELECT * FROM rooms WHERE id = ?', [roomId]);
+    if (existingRooms.length === 0)
+        errors.push('Room not found');
+
+    // If any validation errors, return 400 with error details and STOP
+    if (errors.length > 0) {
+        // Prevent further code execution after sending response
+        return res.status(400).json({ success: false, message: 'Validation failed', errors });
+    }
+
+    // Update the room in the database
+    await pool.execute(
+        `UPDATE rooms SET room_name = ?, floor = ?, area = ?, x = ?, y = ? WHERE id = ?`,
+        [
+            room_name,
+            floor !== undefined && floor !== null && floor !== '' ? floor : null,
+            area !== undefined && area !== null && area !== '' ? area : null,
+            x,
+            y,
+            roomId
+        ]
+    );
+
+    // If there are sensors linked to this room, update their x/y as well
+    const [sensors] = await pool.execute('SELECT id FROM sensors WHERE room_id = ?', [roomId]);
+    if (sensors.length > 0) {
+        await pool.execute(
+            `UPDATE sensors SET x = ?, y = ?, updated_at = CURRENT_TIMESTAMP WHERE room_id = ?`,
+            [x, y, roomId]
+        );
+    }
+
+    // Fetch and return the updated room details
+    const [updatedRoom] = await pool.execute(
+        `SELECT r.*, a.name as area_name FROM rooms r LEFT JOIN areas a ON r.area = a.id WHERE r.id = ?`,
+        [roomId]
+    );
+
+    res.json({
+        success: true,
+        message: 'Room updated successfully',
+        data: updatedRoom[0]
+    });
+});
+
 // === SENSORS API ===
 app.get('/api/sensors', authenticateUser, async (req, res) => {
     try {
@@ -755,6 +848,12 @@ app.listen(PORT, () => {
 });
 
 // Place this at the END of your routes, after all API endpoints:
+app.use((req, res, next) => {
+    res.status(404).send('Not Found');
+});
+app.use((req, res, next) => {
+    res.status(404).send('Not Found');
+});
 app.use((req, res, next) => {
     res.status(404).send('Not Found');
 });

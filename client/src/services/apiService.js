@@ -90,6 +90,23 @@ const apiService = {
     });
     const data = await response.json();
     return data;
+  },
+
+  // Update existing room (admin only)
+  updateRoom: async (user, roomId, roomData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+        method: 'PUT',
+        headers: createAuthHeaders(user),
+        body: JSON.stringify(roomData)
+      });
+      // Always try to parse JSON, even on error
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      // Return a consistent error object
+      return { success: false, message: err.message || 'Network error' };
+    }
   }
 };
 
