@@ -77,6 +77,19 @@ const apiService = {
     });
     const data = await response.json();
     return data;
+  },
+
+  // Delete room (admin only)
+  deleteRoom: async (user, roomId) => {
+    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+      method: 'DELETE',
+      headers: {
+        'username': user.credentials.username,
+        'password': user.credentials.password
+      }
+    });
+    const data = await response.json();
+    return data;
   }
 };
 

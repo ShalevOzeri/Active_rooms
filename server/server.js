@@ -351,6 +351,79 @@ app.post('/api/rooms', authenticateUser, requireAdmin, async (req, res) => {
         });
     }
 });
+// --- Delete Room (admin only, sensors remain with room_id = NULL) ---
+app.delete('/api/rooms/:id', authenticateUser, requireAdmin, async (req, res) => {
+    try {
+        const roomId = req.params.id;
+
+        // Debug log for incoming request
+        console.log('DELETE /api/rooms/:id called with id:', roomId);
+
+        if (!roomId || typeof roomId !== 'string' || roomId.trim() === '') {
+            console.log('Room ID missing or invalid');
+            return res.status(400).json({
+                success: false,
+                message: 'Room ID is required and must be a valid string'
+            });
+        }
+
+        // Check if room exists
+        const [existingRooms] = await pool.execute(
+            'SELECT id FROM rooms WHERE id = ?',
+            [roomId]
+        );
+        console.log('Room lookup result:', existingRooms);
+
+        if (existingRooms.length === 0) {
+            console.log('Room not found in DB');
+            return res.status(404).json({
+                success: false,
+                message: `Room ${roomId} not found`
+            });
+        }
+
+        // Set room_id to NULL for all sensors referencing this room
+        const [updateSensors] = await pool.execute(
+            'UPDATE sensors SET room_id = NULL WHERE room_id = ?',
+            [roomId]
+        );
+        console.log(`Updated sensors (set room_id=NULL) for room ${roomId}:`, updateSensors.affectedRows);
+
+        // Delete from area_room (if exists)
+        const [areaRoomDelResult] = await pool.execute(
+            'DELETE FROM area_room WHERE room_id = ?',
+            [roomId]
+        );
+        console.log('Deleted area_room rows:', areaRoomDelResult.affectedRows);
+
+        // Delete the room
+        const [result] = await pool.execute(
+            'DELETE FROM rooms WHERE id = ?',
+            [roomId]
+        );
+        console.log('Deleted rooms rows:', result.affectedRows);
+
+        if (result.affectedRows > 0) {
+            console.log(`Room ${roomId} deleted successfully`);
+            res.json({
+                success: true,
+                message: `Room ${roomId} deleted successfully. Sensors remain in DB with no room.`
+            });
+        } else {
+            console.log('Failed to delete room');
+            res.status(500).json({
+                success: false,
+                message: 'Failed to delete room'
+            });
+        }
+    } catch (error) {
+        console.error('❌ Error in DELETE /api/rooms/:id:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Database error: ' + error.message
+        });
+    }
+});
 
 // === SENSORS API ===
 app.get('/api/sensors', authenticateUser, async (req, res) => {
@@ -680,3 +753,12 @@ app.listen(PORT, () => {
     console.log(`📡 API Base URL: http://localhost:${PORT}/api`);
     console.log(`✅ Comprehensive validation enabled`);
 });
+
+// Place this at the END of your routes, after all API endpoints:
+app.use((req, res, next) => {
+    res.status(404).send('Not Found');
+});
+app.use((req, res, next) => {
+    res.status(404).send('Not Found');
+});
+

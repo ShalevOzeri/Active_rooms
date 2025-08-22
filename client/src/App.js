@@ -157,6 +157,27 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
+  // --- Delete Room handler ---
+  const handleDeleteRoom = async (roomId) => {
+    if (!window.confirm(`Are you sure you want to delete room ${roomId}? Sensors (if exist) will remain without a room.`)) {
+      return;
+    }
+    try {
+      setLoading(true);
+      const data = await apiService.deleteRoom(user, roomId);
+      if (data.success) {
+        setMessage(`✅ Room ${roomId} deleted successfully!`);
+        fetchData();
+      } else {
+        setMessage(`❌ Error: ${data.message}`);
+      }
+    } catch (error) {
+      setMessage('❌ Error deleting room');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Auto-hide message after 3 seconds
   useEffect(() => {
     if (message) {
@@ -246,6 +267,7 @@ const Dashboard = ({ user, onLogout }) => {
             rooms={rooms}
             user={user}
             onAddRoom={() => setShowAddRoomModal(true)}
+            onDeleteRoom={handleDeleteRoom}
           />
         </div>
 

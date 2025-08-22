@@ -267,10 +267,13 @@ const AddSensorModal = ({ isOpen, onClose, onSave, rooms, sensors, initialX, ini
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
-                cursor: 'pointer'
+                fontWeight: 'bold',
+                fontSize: 15,
+                cursor: 'pointer',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.07)'
               }}
             >
-              Add Sensor
+              ➕ Add Sensor
             </button>
           </div>
         </form>
