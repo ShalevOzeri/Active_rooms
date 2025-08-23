@@ -342,6 +342,9 @@ app.post('/api/rooms', authenticateUser, requireAdmin, async (req, res) => {
                 `INSERT INTO area_room (area_id, room_id, room_name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE area_id = VALUES(area_id), room_name = VALUES(room_name)`,
                 [areaIdToUse, id, room_number]
             );
+        } else {
+            // No area: ensure no area_room row exists
+            await pool.execute('DELETE FROM area_room WHERE room_id = ?', [id]);
         }
 
         // Return the new room
@@ -380,8 +383,9 @@ app.post('/api/rooms', authenticateUser, requireAdmin, async (req, res) => {
                 values.push(data.description);
             }
             if (data.area !== undefined) {
+                const areaValue = (data.area === '' || data.area === null) ? null : data.area;
                 fields.push('area = ?');
-                values.push(data.area);
+                values.push(areaValue);
             }
             if (data.x !== undefined) {
                 fields.push('x = ?');
@@ -406,18 +410,23 @@ app.post('/api/rooms', authenticateUser, requireAdmin, async (req, res) => {
             if (result.affectedRows === 0) {
                 return res.status(404).json({ success: false, message: 'Room not found' });
             }
-            // Update area_room table if area is set
+            // Update area_room table if area is set or removed
             if (data.area !== undefined) {
-                // get room_name (prefer from data, else fetch from DB)
-                let roomName = data.room_name;
-                if (!roomName) {
-                    const [rows] = await pool.execute('SELECT room_name FROM rooms WHERE id = ?', [roomId]);
-                    roomName = rows.length > 0 ? rows[0].room_name : null;
+                if (data.area === '' || data.area === null) {
+                    // No area: remove from area_room
+                    await pool.execute('DELETE FROM area_room WHERE room_id = ?', [roomId]);
+                } else {
+                    // get room_name (prefer from data, else fetch from DB)
+                    let roomName = data.room_name;
+                    if (!roomName) {
+                        const [rows] = await pool.execute('SELECT room_name FROM rooms WHERE id = ?', [roomId]);
+                        roomName = rows.length > 0 ? rows[0].room_name : null;
+                    }
+                    await pool.execute(
+                        `INSERT INTO area_room (area_id, room_id, room_name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE area_id = VALUES(area_id), room_name = VALUES(room_name)`,
+                        [data.area, roomId, roomName]
+                    );
                 }
-                await pool.execute(
-                    `INSERT INTO area_room (area_id, room_id, room_name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE area_id = VALUES(area_id), room_name = VALUES(room_name)`,
-                    [data.area, roomId, roomName]
-                );
             }
             res.json({ success: true, message: 'Room updated successfully' });
         } catch (error) {
