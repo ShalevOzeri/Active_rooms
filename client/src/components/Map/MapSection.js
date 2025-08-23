@@ -8,7 +8,8 @@ const MapSection = ({
   rooms, 
   onSensorClick,
   onMapClick,
-  onAddRoomFromMap
+  onAddRoomFromMap,
+  user
 }) => {
   return (
     <div>
@@ -43,6 +44,7 @@ const MapSection = ({
           onSensorClick={onSensorClick}
           onMapClick={onMapClick}
           onAddRoomFromMap={onAddRoomFromMap}
+          user={user}
         />
       )}
     </div>

@@ -12,17 +12,17 @@ function ChooseAddTypeModal({ x, y, onChoose, onCancel }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center'
     }} onClick={onCancel}>
       <div style={{ background: 'white', padding: 24, borderRadius: 10, minWidth: 260 }} onClick={e => e.stopPropagation()}>
-  <h4 style={{marginBottom:16}}>What would you like to add?</h4>
-  <button style={{width:'100%',marginBottom:10,padding:10,background:'#2196f3',color:'white',border:'none',borderRadius:6,fontSize:16,cursor:'pointer'}} onClick={()=>onChoose('room')}>Add Room</button>
-  <button style={{width:'100%',marginBottom:10,padding:10,background:'#4caf50',color:'white',border:'none',borderRadius:6,fontSize:16,cursor:'pointer'}} onClick={()=>onChoose('sensor')}>Add Sensor</button>
-  <button style={{width:'100%',padding:10,background:'#f44336',color:'white',border:'none',borderRadius:6,fontSize:16,cursor:'pointer'}} onClick={onCancel}>Cancel</button>
+        <h4 style={{marginBottom:16}}>What would you like to add?</h4>
+        <button style={{width:'100%',marginBottom:10,padding:10,background:'#2196f3',color:'white',border:'none',borderRadius:6,fontSize:16,cursor:'pointer'}} onClick={()=>onChoose('room')}>Add Room</button>
+        <button style={{width:'100%',marginBottom:10,padding:10,background:'#4caf50',color:'white',border:'none',borderRadius:6,fontSize:16,cursor:'pointer'}} onClick={()=>onChoose('sensor')}>Add Sensor</button>
+        <button style={{width:'100%',padding:10,background:'#f44336',color:'white',border:'none',borderRadius:6,fontSize:16,cursor:'pointer'}} onClick={onCancel}>Cancel</button>
         <div style={{marginTop:16,fontSize:13,color:'#888'}}>x: {x} | y: {y}</div>
       </div>
     </div>
   );
 }
 
-const Map = ({ sensors, rooms, onSensorClick, onMapClick, onAddRoomFromMap }) => {
+const Map = ({ sensors, rooms, onSensorClick, onMapClick, onAddRoomFromMap, user }) => {
   const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
   // const [addSensorPos, setAddSensorPos] = useState(null);
@@ -55,6 +55,7 @@ const Map = ({ sensors, rooms, onSensorClick, onMapClick, onAddRoomFromMap }) =>
   // Handle map click (not on marker)
   const handleMapClick = (e) => {
     if (e.target.closest('.sensor-marker')) return;
+    if (!user || user.role !== 'admin') return;
     const rect = e.target.getBoundingClientRect();
     const x = Math.round((e.clientX - rect.left) * 800 / rect.width);
     const y = Math.round((e.clientY - rect.top) * 600 / rect.height);
@@ -159,7 +160,7 @@ const Map = ({ sensors, rooms, onSensorClick, onMapClick, onAddRoomFromMap }) =>
         })}
 
         {/* Choose add type modal */}
-        {chooseType && (
+        {chooseType && user && user.role === 'admin' && (
           <ChooseAddTypeModal
             x={chooseType.x}
             y={chooseType.y}

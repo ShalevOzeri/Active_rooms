@@ -349,6 +349,7 @@ const Dashboard = ({ user, onLogout }) => {
                     }
                   : undefined
               }
+              user={user}
             />
           </div>
         )}
