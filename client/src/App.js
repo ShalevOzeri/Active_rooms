@@ -39,10 +39,10 @@ const Dashboard = ({ user, onLogout }) => {
   const getFullRoomLabel = (roomId) => {
     const room = rooms.find(r => r.id === roomId);
     if (!room) return 'N/A';
-      return `${room.room_name} (${room.area || 'Unknown'})`;
+    return `${room.room_name} (${room.area || 'Unknown'})`;
   };
-  {/* Define area bounds for sensor placement on the map */}
-    const areaBounds = {
+  // Define area bounds for sensor placement on the map
+  const areaBounds = {
     1: { xMin: 50,  xMax: 150, yMin: 40,  yMax: 120 },
     2: { xMin: 160, xMax: 240, yMin: 40,  yMax: 120 },
     3: { xMin: 50,  xMax: 140, yMin: 160, yMax: 240 },
@@ -51,7 +51,6 @@ const Dashboard = ({ user, onLogout }) => {
     6: { xMin: 500, xMax: 620, yMin: 270, yMax: 370 },
     7: { xMin: 630, xMax: 770, yMin: 270, yMax: 390 },
     8: { xMin: 310, xMax: 420, yMin: 460, yMax: 580 },
-
   };
 
   const getRoomArea = (roomId) => {
@@ -61,7 +60,7 @@ const Dashboard = ({ user, onLogout }) => {
 
   useEffect(() => {
     fetchData();
-    }, [user]);
+  }, [user]);
 
   const fetchData = async () => {
     try {
@@ -86,7 +85,7 @@ const Dashboard = ({ user, onLogout }) => {
   const handleAddSensor = async (sensorData) => {
     try {
       setLoading(true);
-      console.log("🛰️ שולחת את הסנסור:", sensorData);
+      console.log("🛰️ Sending sensor:", sensorData);
       
       const data = await apiService.addSensor(user, sensorData);
       if (data.success) {
@@ -111,7 +110,7 @@ const Dashboard = ({ user, onLogout }) => {
       if (data.success) {
         setMessage(`✅ Sensor ${sensorData.id} updated successfully!`);
         setEditSensor(null);
-        // כאן מתבצע fetchData שמרענן את כל הסנסורים (וגם החדרים) מהשרת
+        // fetchData refreshes all sensors (and rooms) from the server
         fetchData();
       } else {
         setMessage(`❌ Error: ${data.message}`);
@@ -153,9 +152,9 @@ const Dashboard = ({ user, onLogout }) => {
       if (data.success) {
         setMessage(`✅ Room added successfully!`);
         setShowAddRoomModal(false);
-        // עדכן את רשימת החדרים מיידית (ללא fetchData)
+        // Update the room list immediately (without fetchData)
         setRooms(prevRooms => {
-          // אם החדר כבר קיים (למשל עדכון), עדכן אותו, אחרת הוסף
+          // If the room already exists (e.g. update), update it, otherwise add
           if (prevRooms.some(r => r.id === data.data.id)) {
             return prevRooms.map(r => r.id === data.data.id ? data.data : r);
           }
@@ -179,7 +178,7 @@ const Dashboard = ({ user, onLogout }) => {
       if (data.success) {
         setMessage(`✅ Room updated successfully!`);
         setEditRoom(null);
-        // ודא ש-fetchData מחכה לסיום לפני סגירת המודאל
+        // Make sure fetchData finishes before closing the modal
         await fetchData();
       } else {
         setMessage(`❌ Error: ${data.message || (data.errors && data.errors.join(', '))}`);
@@ -201,7 +200,7 @@ const Dashboard = ({ user, onLogout }) => {
       const data = await apiService.deleteRoom(user, roomId);
       if (data.success) {
         setMessage(`✅ Room ${roomId} deleted successfully!`);
-        // הסר את החדר מהרשימה מיידית (ללא fetchData)
+        // Remove the room from the list immediately (without fetchData)
         setRooms(prevRooms => prevRooms.filter(r => r.id !== roomId));
       } else {
         setMessage(`❌ Error: ${data.message}`);
@@ -337,9 +336,9 @@ const Dashboard = ({ user, onLogout }) => {
                 user?.role === 'admin'
                   ? (x, y) => {
                       setAddSensorXY({ x, y });
-                        setShowAddModal(true);
-                      }
-                      : undefined // do not pass anything if not admin
+                      setShowAddModal(true);
+                    }
+                  : undefined // do not pass anything if not admin
               }
             />
           </div>
@@ -389,7 +388,7 @@ const Dashboard = ({ user, onLogout }) => {
         room={editRoom}
         areas={areas}
         onSave={roomData => handleUpdateRoom(editRoom.id, roomData)}
-        user={user} // <-- add this line
+        user={user}
       />
     </div>
   );
