@@ -59,6 +59,39 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// --- Delete Room (admin only) ---
+// This endpoint deletes a room by its ID. It requires admin authentication.
+// Steps:
+// 1. Check if the room exists.
+// 2. Delete all sensors in this room (if any).
+// 3. Remove all area-room relations for this room (area_room table).
+// 4. Delete the room from the rooms table.
+// 5. Return success or error message.
+app.delete('/api/rooms/:id', authenticateUser, requireAdmin, async (req, res) => {
+    const roomId = req.params.id;
+    try {
+        // 1. Check if the room exists
+        const [rooms] = await pool.execute('SELECT * FROM rooms WHERE id = ?', [roomId]);
+        if (rooms.length === 0) {
+            return res.status(404).json({ success: false, message: 'Room not found' });
+        }
+
+        // 2. Delete all sensors in this room
+        await pool.execute('DELETE FROM sensors WHERE room_id = ?', [roomId]);
+
+        // 3. Remove all area-room relations for this room
+        await pool.execute('DELETE FROM area_room WHERE room_id = ?', [roomId]);
+
+        // 4. Delete the room itself
+        await pool.execute('DELETE FROM rooms WHERE id = ?', [roomId]);
+
+        res.json({ success: true, message: 'Room deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to delete room', error: error.message });
+    }
+});
+
+// === VALIDATION FUNCTIONS ===
 // === VALIDATION FUNCTIONS ===
 const validateSensorData = (data, isUpdate = false) => {
     const errors = [];

@@ -38,7 +38,7 @@ CREATE TABLE `area_room` (
 
 LOCK TABLES `area_room` WRITE;
 /*!40000 ALTER TABLE `area_room` DISABLE KEYS */;
-INSERT INTO `area_room` VALUES ('1','7',201),('2','8',202),('3','10',301),('3','13',401),('4','11',302),('5','12',303),('6','9',203),('7','1',101),('7','2',102),('7','3',103),('8','4',104),('8','5',105),('8','6',106);
+INSERT INTO `area_room` VALUES ('1','7',201),('2','8',202),('29','38',60),('29','39',66),('3','10',301),('3','13',401),('4','11',302),('5','12',303),('6','9',203),('7','1',101),('7','2',102),('7','3',103),('8','4',104),('8','5',105),('8','6',106);
 /*!40000 ALTER TABLE `area_room` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -65,7 +65,7 @@ CREATE TABLE `areas` (
 
 LOCK TABLES `areas` WRITE;
 /*!40000 ALTER TABLE `areas` DISABLE KEYS */;
-INSERT INTO `areas` VALUES ('1','Building 1','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('2','Building 2','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('3','Building 3','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('4','Building 4','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('5','Building 5','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('6','Building 6','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('7','Building 7','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('8','Building 8','Default description','M0,0 L10,0 L10,10 L0,10 Z',10);
+INSERT INTO `areas` VALUES ('1','Building 1','Default description ','M0,0 L10,0 L10,10 L0,10 Z',10),('2','Building 2','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('29','Labs','Labs outside',NULL,0),('3','Building 3','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('4','Building 4','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('5','Building 5','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('6','Building 6','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('7','Building 7','Default description','M0,0 L10,0 L10,10 L0,10 Z',10),('8','Building 8','Default description','M0,0 L10,0 L10,10 L0,10 Z',10);
 /*!40000 ALTER TABLE `areas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -79,7 +79,7 @@ DROP TABLE IF EXISTS `rooms`;
 CREATE TABLE `rooms` (
   `id` varchar(10) NOT NULL,
   `description` text,
-  `area` int unsigned NOT NULL,
+  `area` int DEFAULT NULL,
   `x` int DEFAULT NULL,
   `y` int DEFAULT NULL,
   `floor` int DEFAULT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE `rooms` (
 
 LOCK TABLES `rooms` WRITE;
 /*!40000 ALTER TABLE `rooms` DISABLE KEYS */;
-INSERT INTO `rooms` VALUES ('1','building 7 floor 0 room 112',7,690,380,4,401),('10','building 3 floor 2 room 201',3,100,190,2,201),('11','building 4 floor 2 room 101',4,240,180,1,101),('12','building 5 floor 2 room 220',5,300,370,2,220),('13','building 3 floor 3 room 401',3,100,220,4,401),('14','building 6 floor 0 room 101',6,300,400,1,101),('2','building 7 floor 0 room 102',7,650,440,1,102),('3','building 7 floor 0 room 103',7,660,430,1,103),('4','building 8 floor 0 room 201',8,230,500,2,201),('5','building 8 floor 0 room 300',8,300,450,3,300),('6','building 8 floor 0 room 201',8,290,490,2,201),('7','building 1 floor 1 room 201',1,100,50,2,201),('8','building 2 floor 1 room 201',2,90,100,2,201),('9','building 6 floor 1 room 216',6,520,390,2,216);
+INSERT INTO `rooms` VALUES ('1','building 7 floor 0 room 112',7,690,380,4,401),('10','building 3 floor 2 room 201',3,100,190,2,201),('11','building 4 floor 2 room 101',4,240,180,1,101),('12','building 5 floor 2 room 220',5,300,370,2,220),('13','building 3 floor 3 room 401',3,100,220,4,401),('14','building 6 floor 0 room 101',6,530,360,1,101),('2','building 7 floor 0 room 102',7,650,440,1,102),('3','building 7 floor 0 room 103',7,670,430,1,103),('38','Lab num 1',29,250,250,NULL,60),('39','Lab num 2',29,396,274,NULL,66),('4','building 8 floor 0 room 201',8,230,500,2,201),('5','building 8 floor 0 room 300',8,300,450,3,300),('55','Lab num 3',NULL,324,246,NULL,62),('6','building 8 floor 0 room 201',8,290,490,2,201),('7','building 1 floor 1 room 201',1,100,50,2,201),('8','building 2 floor 1 room 201',2,80,100,2,201),('9','building 6 floor 1 room 216',6,520,390,2,216);
 /*!40000 ALTER TABLE `rooms` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -124,7 +124,7 @@ CREATE TABLE `sensors` (
 
 LOCK TABLES `sensors` WRITE;
 /*!40000 ALTER TABLE `sensors` DISABLE KEYS */;
-INSERT INTO `sensors` VALUES ('S001','9',520,390,'occupied','2025-08-02 22:16:08','2025-08-09 22:08:12'),('S002','3',660,430,'occupied','2025-08-04 12:37:06','2025-08-07 23:58:40'),('S003','11',240,180,'available','2025-08-02 22:16:08','2025-08-11 17:59:20'),('S005','10',100,190,'available','2025-08-04 12:10:05','2025-08-08 00:01:09'),('S007','2',650,440,'available','2025-08-07 23:58:21','2025-08-07 23:58:21'),('S009','6',290,490,'occupied','2025-08-04 13:02:58','2025-08-07 22:17:28'),('S010','8',90,100,'available','2025-08-08 22:26:29','2025-08-08 22:27:17'),('S014','4',230,500,'occupied','2025-08-07 23:59:39','2025-08-07 23:59:39'),('S019','1',690,380,'error','2025-08-14 14:16:33','2025-08-14 14:16:33'),('S023','13',100,220,'occupied','2025-08-08 00:02:53','2025-08-08 00:02:53'),('S024','14',300,400,'available','2025-08-08 00:00:23','2025-08-08 00:00:23'),('S033','5',300,450,'error','2025-08-07 23:52:59','2025-08-08 22:19:48'),('S055','12',300,370,'error','2025-08-14 11:51:39','2025-08-14 13:04:22'),('S077','7',100,50,'error','2025-08-14 14:57:35','2025-08-14 14:58:20');
+INSERT INTO `sensors` VALUES ('S001','9',520,390,'occupied','2025-08-02 22:16:08','2025-08-09 22:08:12'),('S002','3',670,430,'occupied','2025-08-04 12:37:06','2025-08-22 23:23:37'),('S003','11',240,180,'available','2025-08-02 22:16:08','2025-08-11 17:59:20'),('S005','10',100,190,'available','2025-08-04 12:10:05','2025-08-08 00:01:09'),('S007','2',650,440,'available','2025-08-07 23:58:21','2025-08-07 23:58:21'),('S009','6',290,490,'occupied','2025-08-04 13:02:58','2025-08-18 17:11:13'),('S010','8',80,100,'available','2025-08-08 22:26:29','2025-08-20 11:33:24'),('S014','4',230,500,'occupied','2025-08-07 23:59:39','2025-08-07 23:59:39'),('S019','1',690,380,'error','2025-08-14 14:16:33','2025-08-14 14:16:33'),('S022','55',324,246,'error','2025-08-23 08:28:38','2025-08-23 08:28:38'),('S023','13',100,220,'occupied','2025-08-08 00:02:53','2025-08-08 00:02:53'),('S024','14',530,360,'available','2025-08-08 00:00:23','2025-08-22 23:17:52'),('S031','39',396,274,'available','2025-08-23 08:16:59','2025-08-23 08:16:59'),('S033','5',300,450,'error','2025-08-07 23:52:59','2025-08-08 22:19:48'),('S055','12',300,370,'occupied','2025-08-14 11:51:39','2025-08-17 16:38:07'),('S088','7',100,50,'available','2025-08-20 15:05:36','2025-08-20 15:07:32'),('S099','38',250,250,'available','2025-08-22 21:48:31','2025-08-23 00:08:29');
 /*!40000 ALTER TABLE `sensors` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -166,4 +166,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-14 18:56:49
+-- Dump completed on 2025-08-23 19:37:09
