@@ -1,7 +1,9 @@
+// ...existing code...
 import React, { useState, useEffect } from 'react';
 import SensorMarker from './SensorMarker';
 import MapLegend from './MapLegend';
 // import AddSensorDialog from './AddSensorDialog';
+import RoomMarker from './RoomMarrker';
 
 // Modal for choosing between room/sensor
 function ChooseAddTypeModal({ x, y, onChoose, onCancel }) {
@@ -138,6 +140,12 @@ const Map = ({ sensors, rooms, onSensorClick, onMapClick, onAddRoomFromMap, user
             setMapDimensions({ width: rect.width, height: rect.height });
           }}
         />
+
+        {/* Rooms on the map as blue squares */}
+        {rooms && rooms.filter(room => room.x !== undefined && room.y !== undefined && room.x !== '' && room.y !== '').map(room => {
+          const pos = getSensorPosition(room, mapDimensions.width, mapDimensions.height);
+          return <RoomMarker key={room.id} room={room} pos={pos} />;
+        })}
 
         {/* Sensors on the map */}
         {sensors.map(sensor => {
