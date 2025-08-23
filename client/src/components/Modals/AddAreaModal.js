@@ -23,27 +23,47 @@ const AddAreaModal = ({ isOpen, onClose, onSave, serverErrors }) => {
 
   return (
     <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.4)', zIndex: 2000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center'
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
     }} onClick={onClose}>
-      <div style={{ background: 'white', padding: 28, borderRadius: 12, minWidth: 320, boxShadow: '0 2px 16px rgba(0,0,0,0.13)' }} onClick={e => e.stopPropagation()}>
-        <h3 style={{marginTop:0,marginBottom:18}}>Add Area</h3>
+      <div style={{
+        background: 'white',
+        padding: '25px',
+        borderRadius: '12px',
+        maxWidth: '450px',
+        width: '90%',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.13)'
+      }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', margin: '0 0 20px 0' }}>
+          <h3 style={{ color: '#333', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+            Add Area <span style={{ fontSize: 28 }}>➕</span>
+          </h3>
+        </div>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>
+          {/* Area ID */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               ID
             </label>
             <input
               name="id"
               value={form.id}
               onChange={handleChange}
-              style={{ width: '100%', padding: '8px 12px', border: '2px solid #ddd', borderRadius: 6, fontSize: 15 }}
+              style={{ width: '100%', padding: '8px 12px', border: '2px solid #ddd', borderRadius: '6px', fontSize: '14px' }}
               placeholder="(Auto)"
             />
           </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>
+          {/* Name */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Name <span style={{ color: 'red' }}>*</span>
             </label>
             <input
@@ -51,21 +71,23 @@ const AddAreaModal = ({ isOpen, onClose, onSave, serverErrors }) => {
               value={form.name}
               onChange={handleChange}
               required
-              style={{ width: '100%', padding: '8px 12px', border: '2px solid #ddd', borderRadius: 6, fontSize: 15 }}
+              style={{ width: '100%', padding: '8px 12px', border: '2px solid #ddd', borderRadius: '6px', fontSize: '14px' }}
               autoFocus
             />
           </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: 6 }}>
+          {/* Description */}
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Description
             </label>
             <input
               name="description"
               value={form.description}
               onChange={handleChange}
-              style={{ width: '100%', padding: '8px 12px', border: '2px solid #ddd', borderRadius: 6, fontSize: 15 }}
+              style={{ width: '100%', padding: '8px 12px', border: '2px solid #ddd', borderRadius: '6px', fontSize: '14px' }}
             />
           </div>
+          {/* Error messages */}
           {error && <div style={{ color: '#f44336', marginBottom: 10 }}>{error}</div>}
           {serverErrors && serverErrors.length > 0 && (
             <div style={{ color: '#f44336', marginBottom: 10 }}>
@@ -74,9 +96,40 @@ const AddAreaModal = ({ isOpen, onClose, onSave, serverErrors }) => {
               ))}
             </div>
           )}
-          <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-            <button type="button" onClick={onClose} style={{ flex: 1, padding: 10, background: '#f44336', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>Cancel</button>
-            <button type="submit" style={{ flex: 1, padding: 10, background: '#2196f3', color: 'white', border: 'none', borderRadius: 6, fontWeight: 'bold', fontSize: 15, cursor: 'pointer' }}>Save</button>
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="submit"
+              style={{
+                flex: 1,
+                padding: '10px',
+                background: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: 'bold',
+                fontSize: 15,
+                cursor: 'pointer',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.07)'
+              }}
+            >
+              Add Area <span style={{marginLeft: 6, fontSize: 18}}>➕</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                flex: 1,
+                padding: '10px',
+                background: '#f44336',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>
