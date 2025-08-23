@@ -1,3 +1,4 @@
+
 const API_BASE_URL = 'http://localhost:3001/api';
 
 const createAuthHeaders = (user) => ({
@@ -7,7 +8,7 @@ const createAuthHeaders = (user) => ({
 });
 
 const apiService = {
-  // Add new area
+  // --- AREAS ---
   addArea: async (user, areaData) => {
     const response = await fetch(`${API_BASE_URL}/areas`, {
       method: 'POST',
@@ -17,80 +18,28 @@ const apiService = {
     const data = await response.json();
     return data;
   },
-  // Fetch rooms data
-  fetchRooms: async () => {
-    const response = await fetch(`${API_BASE_URL}/rooms`);
-    const data = await response.json();
-    return data;
-  },
-  
-  // Fetch sensors data
-  fetchSensors: async (user) => {
-    const response = await fetch(`${API_BASE_URL}/sensors`, {
-      headers: {
-        'username': user.credentials.username,
-        'password': user.credentials.password
-      }
+
+  updateArea: async (user, areaId, areaData) => {
+    const response = await fetch(`${API_BASE_URL}/areas/${areaId}`, {
+      method: 'PUT',
+      headers: createAuthHeaders(user),
+      body: JSON.stringify(areaData)
     });
     const data = await response.json();
     return data;
   },
-  // Delete area (admin only)
+
   deleteArea: async (user, areaId) => {
     const response = await fetch(`${API_BASE_URL}/areas/${areaId}`, {
       method: 'DELETE',
-      headers: {
-        'username': user.credentials.username,
-        'password': user.credentials.password
-      }
-    });
-    const data = await response.json();
-    return data;
-  },
-  
-  // Add new sensor
-  addSensor: async (user, sensorData) => {
-    const response = await fetch(`${API_BASE_URL}/sensors`, {
-      method: 'POST',
-      headers: createAuthHeaders(user),
-      body: JSON.stringify(sensorData)
+      headers: createAuthHeaders(user)
     });
     const data = await response.json();
     return data;
   },
 
-  // Update existing sensor
-  updateSensor: async (user, sensorData) => {
-    const response = await fetch(`${API_BASE_URL}/sensors/${sensorData.id}`, {
-      method: 'PUT',
-      headers: createAuthHeaders(user),
-      body: JSON.stringify(sensorData)
-    });
-    const data = await response.json();
-    return data;
-  },
 
-  // Delete sensor
-  deleteSensor: async (user, sensorId) => {
-    const response = await fetch(`${API_BASE_URL}/sensors/${sensorId}`, {
-      method: 'DELETE',
-      headers: {
-        'username': user.credentials.username,
-        'password': user.credentials.password
-      }
-    });
-    const data = await response.json();
-    return data;
-  },
-
-  // Fetch areas data
-  fetchAreas: async () => {
-    const response = await fetch(`${API_BASE_URL}/areas`);
-    const data = await response.json();
-    return data;
-  },
-
-  // Add new room
+  // --- ROOMS ---
   addRoom: async (user, roomData) => {
     const response = await fetch(`${API_BASE_URL}/rooms`, {
       method: 'POST',
@@ -101,20 +50,6 @@ const apiService = {
     return data;
   },
 
-  // Delete room (admin only)
-  deleteRoom: async (user, roomId) => {
-    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
-      method: 'DELETE',
-      headers: {
-        'username': user.credentials.username,
-        'password': user.credentials.password
-      }
-    });
-    const data = await response.json();
-    return data;
-  },
-
-  // Update existing room (admin only)
   updateRoom: async (user, roomId, roomData) => {
     try {
       const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
@@ -122,13 +57,71 @@ const apiService = {
         headers: createAuthHeaders(user),
         body: JSON.stringify(roomData)
       });
-      // Always try to parse JSON, even on error
       const data = await response.json();
       return data;
     } catch (err) {
-      // Return a consistent error object
       return { success: false, message: err.message || 'Network error' };
     }
+  },
+
+  deleteRoom: async (user, roomId) => {
+    const response = await fetch(`${API_BASE_URL}/rooms/${roomId}`, {
+      method: 'DELETE',
+      headers: createAuthHeaders(user)
+    });
+    const data = await response.json();
+    return data;
+  },
+
+  // --- SENSORS ---
+  addSensor: async (user, sensorData) => {
+    const response = await fetch(`${API_BASE_URL}/sensors`, {
+      method: 'POST',
+      headers: createAuthHeaders(user),
+      body: JSON.stringify(sensorData)
+    });
+    const data = await response.json();
+    return data;
+  },
+
+  updateSensor: async (user, sensorData) => {
+    const response = await fetch(`${API_BASE_URL}/sensors/${sensorData.id}`, {
+      method: 'PUT',
+      headers: createAuthHeaders(user),
+      body: JSON.stringify(sensorData)
+    });
+    const data = await response.json();
+    return data;
+  },
+
+  deleteSensor: async (user, sensorId) => {
+    const response = await fetch(`${API_BASE_URL}/sensors/${sensorId}`, {
+      method: 'DELETE',
+      headers: createAuthHeaders(user)
+    });
+    const data = await response.json();
+    return data;
+  },
+
+  // --- FETCH METHODS ---
+  fetchAreas: async () => {
+    const response = await fetch(`${API_BASE_URL}/areas`);
+    const data = await response.json();
+    return data;
+  },
+
+  fetchRooms: async () => {
+    const response = await fetch(`${API_BASE_URL}/rooms`);
+    const data = await response.json();
+    return data;
+  },
+
+  fetchSensors: async (user) => {
+    const response = await fetch(`${API_BASE_URL}/sensors`, {
+      headers: createAuthHeaders(user)
+    });
+    const data = await response.json();
+    return data;
   }
 };
 

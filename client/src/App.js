@@ -36,6 +36,37 @@ const Dashboard = ({ user, onLogout }) => {
       setLoading(false);
     }
   };
+
+  // Edit Area handler
+  const handleEditArea = async (updatedArea) => {
+    setLoading(true);
+    try {
+      console.log('[App.js] handleEditArea called with:', updatedArea);
+      if (!updatedArea.id) {
+        setMessage('Error: Area ID is missing!');
+        return { success: false, errors: ['Area ID is missing'] };
+      }
+      const res = await apiService.updateArea(user, updatedArea.id, {
+        name: updatedArea.name,
+        description: updatedArea.description
+      });
+      console.log('[App.js] updateArea response:', res);
+      if (res.success) {
+        setMessage('Area updated successfully!');
+        setAreas(prevAreas => prevAreas.map(a => a.id === updatedArea.id ? { ...a, ...res.data } : a));
+        fetchData();
+        return { success: true };
+      } else {
+        setMessage(res.message || 'Error updating area');
+        return { success: false, errors: res.errors || [res.message || 'Error updating area'] };
+      }
+    } catch (err) {
+      setMessage('Error updating area');
+      return { success: false, errors: ['Error updating area'] };
+    } finally {
+      setLoading(false);
+    }
+  };
   const [sensors, setSensors] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -327,7 +358,15 @@ const Dashboard = ({ user, onLogout }) => {
           )}
           <MessageBanner message={message} />
           <StatsCards sensors={sensors} rooms={rooms} />
-      <AreasOverview rooms={rooms} sensors={sensors} user={user} onAddArea={handleAddArea} onDeleteArea={handleDeleteArea} areas={areas} />
+      <AreasOverview
+        rooms={rooms}
+        sensors={sensors}
+        user={user}
+        onAddArea={handleAddArea}
+        onDeleteArea={handleDeleteArea}
+        onEditArea={handleEditArea}
+        areas={areas}
+      />
           <SensorsSection
             sensors={sensors}
             user={user}

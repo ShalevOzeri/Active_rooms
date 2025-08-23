@@ -779,6 +779,37 @@ app.post('/api/areas', authenticateUser, requireAdmin, async (req, res) => {
     }
 });
 
+// --- Update Area (admin only) ---
+// This endpoint updates an area's name and description. Requires admin authentication.
+app.put('/api/areas/:id', authenticateUser, requireAdmin, async (req, res) => {
+    const areaId = req.params.id;
+    const { name, description } = req.body;
+    const errors = [];
+    // Validation
+    if (!name || typeof name !== 'string' || name.trim().length < 2 || name.length > 100)
+        errors.push('Name is required (2-100 chars)');
+    if (description && description.length > 255)
+        errors.push('Description must be 255 chars or less');
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, message: 'Validation failed', errors });
+    }
+    try {
+        // Check if area exists
+        const [areas] = await pool.execute('SELECT id FROM areas WHERE id = ?', [areaId]);
+        if (areas.length === 0) {
+            return res.status(404).json({ success: false, message: 'Area not found' });
+        }
+        // Update area
+        await pool.execute('UPDATE areas SET name = ?, description = ? WHERE id = ?', [name, description || null, areaId]);
+        // Return updated area
+        const [rows] = await pool.execute('SELECT * FROM areas WHERE id = ?', [areaId]);
+        res.json({ success: true, message: 'Area updated successfully', data: rows[0] });
+    } catch (error) {
+        console.error('❌ Error updating area:', error);
+        res.status(500).json({ success: false, message: 'Error updating area', error: error.message });
+    }
+});
+
 // --- Delete Area (admin only) ---
 // This endpoint deletes an area by its ID. It requires admin authentication.
 // Steps:

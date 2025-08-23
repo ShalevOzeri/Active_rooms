@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import AddAreaModal from '../Modals/AddAreaModal';
+import EditAreaModal from '../Modals/EditAreaModal';
 
-const AreasOverview = ({ rooms, sensors, user, onAddArea, onDeleteArea, areas = [] }) => {
+const AreasOverview = ({ rooms, sensors, user, onAddArea, onDeleteArea, onEditArea, areas = [] }) => {
   const [showAddArea, setShowAddArea] = useState(false);
+  const [editArea, setEditArea] = useState(null);
   const handleAddArea = (areaData) => {
     setShowAddArea(false);
     if (onAddArea) onAddArea(areaData);
+  };
+  const handleEditAreaSave = (updatedArea) => {
+    setEditArea(null);
+    if (onEditArea) onEditArea(updatedArea);
   };
   return (
     <div style={{background: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px'}}>
@@ -45,29 +51,58 @@ const AreasOverview = ({ rooms, sensors, user, onAddArea, onDeleteArea, areas = 
                   boxShadow: '0 6px 12px rgba(0,0,0,0.1)'
                 }}
               >
-                {/* Delete Area Button (admin only) */}
+                {/* Admin buttons: Delete & Edit */}
                 {user?.role === 'admin' && (
-                  <button
-                    onClick={() => onDeleteArea && onDeleteArea(area.id)}
-                    style={{
-                      position: 'absolute',
-                      top: '5px',
-                      right: '5px',
-                      background: '#0000004d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '24px',
-                      height: '24px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      zIndex: 2
-                    }}
-                    title="Delete Area"
-                  >
-                    ✕
-                  </button>
+                  <>
+                    <button
+                      onClick={() => onDeleteArea && onDeleteArea(area.id)}
+                      style={{
+                        position: 'absolute',
+                        top: '5px',
+                        right: '5px',
+                        background: '#0000004d',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        zIndex: 2
+                      }}
+                      title="Delete Area"
+                    >
+                      ✕
+                    </button>
+                    <button
+                      onClick={() => setEditArea(area)}
+                      style={{
+                        position: 'absolute',
+                        top: '5px',
+                        left: '5px',
+                        background: '#0000004d',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        zIndex: 2
+                      }}
+                      title="Edit Area"
+                    >
+                      ✏️
+                    </button>
+                  </>
                 )}
+      {/* Edit Area Modal */}
+      <EditAreaModal
+        isOpen={!!editArea}
+        area={editArea}
+        onClose={() => setEditArea(null)}
+        onSave={handleEditAreaSave}
+      />
                 {/* Area title */}
                 <div style={{
                   display: 'flex',
