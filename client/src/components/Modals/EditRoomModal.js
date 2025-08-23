@@ -64,7 +64,7 @@ export default function EditRoomModal({ open, onClose, room, areas, onSave, user
     if (Object.keys(errs).length > 0) return;
     setSaving(true);
     try {
-      // קריאה ל-onSave תחכה לסיום fetchData לפני סגירת המודאל
+      // Wait for onSave to finish before closing the modal
       if (onSave) {
         await onSave(form);
       }
@@ -80,198 +80,225 @@ export default function EditRoomModal({ open, onClose, room, areas, onSave, user
   if (!open || !room) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0, bottom: 0,
-        background: 'rgba(0,0,0,0.35)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          background: '#fff',
-          borderRadius: 12,
-          minWidth: 340,
-          maxWidth: 400,
-          width: '100%',
-          padding: '32px 28px 22px 28px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        <h2 style={{
-          margin: 0,
-          marginBottom: 18,
-          fontWeight: 700,
-          fontSize: 22,
-          color: '#1976d2',
-          textAlign: 'center',
-          letterSpacing: 0.5
-        }}>
-          Edit Room
-        </h2>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Room Name */}
-          <label style={{ fontWeight: 500 }}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>✏️ Edit Room</h2>
+          <button className="modal-close-btn" onClick={onClose} aria-label="Close">×</button>
+        </div>
+        <form onSubmit={handleSubmit} className="modal-body">
+          <label>
             Room Name:
             <input
               name="room_name"
               value={form.room_name}
               onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '7px 10px',
-                marginTop: 4,
-                borderRadius: 6,
-                border: '1px solid #bdbdbd',
-                fontSize: 15
-              }}
             />
-            {errors.room_name && <span style={{ color: '#d32f2f', fontSize: 13 }}>{errors.room_name}</span>}
+            {errors.room_name && <span className="modal-error">{errors.room_name}</span>}
           </label>
-          {/* Floor */}
-          <label style={{ fontWeight: 500 }}>
+          <label>
             Floor:
             <input
               name="floor"
               value={form.floor}
               onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '7px 10px',
-                marginTop: 4,
-                borderRadius: 6,
-                border: '1px solid #bdbdbd',
-                fontSize: 15
-              }}
             />
-            {errors.floor && <span style={{ color: '#d32f2f', fontSize: 13 }}>{errors.floor}</span>}
+            {errors.floor && <span className="modal-error">{errors.floor}</span>}
           </label>
-          {/* Area */}
-          <label style={{ fontWeight: 500 }}>
+          <label>
             Area:
             <select
               name="area"
               value={form.area}
               onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '7px 10px',
-                marginTop: 4,
-                borderRadius: 6,
-                border: '1px solid #bdbdbd',
-                fontSize: 15
-              }}
             >
               <option value="">No Area</option>
               {areas.map(a => (
                 <option key={a.id} value={a.id}>{a.name}</option>
               ))}
             </select>
-            {errors.area && <span style={{ color: '#d32f2f', fontSize: 13 }}>{errors.area}</span>}
+            {errors.area && <span className="modal-error">{errors.area}</span>}
           </label>
-          {/* X/Y fields at the bottom */}
-          <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-            <label style={{ flex: 1, fontWeight: 500, display: 'flex', flexDirection: 'column' }}>
+          <div className="modal-xy-row">
+            <label>
               Y:
               <input
                 name="y"
                 value={form.y}
                 onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '7px 10px',
-                  marginTop: 4,
-                  borderRadius: 6,
-                  border: '1px solid #bdbdbd',
-                  fontSize: 15
-                }}
               />
-              {errors.y && <span style={{ color: '#d32f2f', fontSize: 13 }}>{errors.y}</span>}
+              {errors.y && <span className="modal-error">{errors.y}</span>}
             </label>
-            <label style={{ flex: 1, fontWeight: 500, display: 'flex', flexDirection: 'column' }}>
+            <label>
               X:
               <input
                 name="x"
                 value={form.x}
                 onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '7px 10px',
-                  marginTop: 4,
-                  borderRadius: 6,
-                  border: '1px solid #bdbdbd',
-                  fontSize: 15
-                }}
               />
-              {errors.x && <span style={{ color: '#d32f2f', fontSize: 13 }}>{errors.x}</span>}
+              {errors.x && <span className="modal-error">{errors.x}</span>}
             </label>
           </div>
-          {errors.api && <div style={{ color: '#d32f2f', fontSize: 14, marginTop: 4 }}>{errors.api}</div>}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: 10,
-            marginTop: 18
-          }}>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-              style={{
-                background: '#e0e0e0',
-                color: '#333',
-                border: 'none',
-                borderRadius: 6,
-                padding: '8px 18px',
-                fontWeight: 500,
-                fontSize: 15,
-                cursor: 'pointer'
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              style={{
-                background: '#1976d2',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 6,
-                padding: '8px 18px',
-                fontWeight: 600,
-                fontSize: 15,
-                cursor: saving ? 'not-allowed' : 'pointer',
-                opacity: saving ? 0.7 : 1
-              }}
-            >
-              Save
-            </button>
-          </div>
+          {errors.api && <div className="modal-error">{errors.api}</div>}
         </form>
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: 10,
-            right: 14,
-            background: 'none',
-            border: 'none',
-            fontSize: 22,
-            color: '#888',
-            cursor: 'pointer'
-          }}
-          aria-label="Close"
-        >×</button>
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="modal-cancel-btn"
+            onClick={onClose}
+            disabled={saving}
+            style={{
+              flex: 1,
+              padding: '10px',
+              background: '#f44336',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="modal-save-btn"
+            disabled={saving}
+            onClick={handleSubmit}
+            style={{
+              flex: 1,
+              padding: '10px',
+              background: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            Save Changes
+          </button>
+        </div>
+        <style>{`
+          .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center; z-index: 9999;
+          }
+          .modal-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+            min-width: 340px;
+            max-width: 95vw;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+          }
+          .modal-header {
+            background: #f5f7fa;
+            padding: 18px 24px 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e1e5e9;
+          }
+          .modal-header h2 {
+            margin: 0;
+            font-size: 1.25em;
+            color: #222; /* black */
+          }
+          .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #888;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+          }
+          .modal-close-btn:hover {
+            background: #e1e5e9;
+            color: #444;
+          }
+          .modal-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+          }
+          .modal-body label {
+            display: flex;
+            flex-direction: column;
+            font-size: 1em;
+            color: #333;
+            gap: 4px;
+          }
+          .modal-body input, .modal-body select {
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1em;
+          }
+          .modal-xy-row {
+            display: flex;
+            gap: 10px;
+          }
+          .modal-xy-row label {
+            flex: 1;
+          }
+          .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px 18px 24px;
+            background: #f5f7fa;
+            border-top: 1px solid #e1e5e9;
+          }
+          .modal-save-btn {
+            background: #43a047; /* green */
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 32px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.08em;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            transition: background 0.15s;
+            letter-spacing: 0.5px;
+            min-width: 110px;
+            min-height: 44px;
+          }
+          .modal-save-btn:hover:enabled {
+            background: #2e7031;
+          }
+          .modal-cancel-btn {
+            background: #f44336; /* red */
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 28px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1.08em;
+            transition: background 0.15s;
+            letter-spacing: 0.2px;
+            min-width: 110px;
+            min-height: 44px;
+          }
+          .modal-cancel-btn:hover:enabled {
+            background: #b71c1c;
+          }
+          .modal-error {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-top: 2px;
+          }
+        `}</style>
       </div>
     </div>
   );

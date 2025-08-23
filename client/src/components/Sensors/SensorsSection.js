@@ -65,22 +65,22 @@ const SensorsSection = ({
               <>
                 <button
                   onClick={() => onEditSensor(sensor)}
-                  style={{
-                    position: 'absolute',
-                    top: '5px',
-                    left: '5px',
-                    background: 'rgba(33,150,243,0.8)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '24px',
-                    height: '24px',
-                    cursor: 'pointer',
-                    fontSize: '12px'
-                  }}
-                  title="Edit Sensor"
-                >
-                  ✎
+               style={{
+                  position: 'absolute',
+                  top: '5px',
+                  left: '5px',
+                  background: '#0000004d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
+                  cursor: 'pointer',
+                  fontSize: '13px'
+                }}
+                title="Edit Sensor"
+              >
+                ✏️
                 </button>
                 <button
                   onClick={() => onDeleteSensor(sensor.id)}
