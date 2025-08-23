@@ -108,7 +108,7 @@ const Map = ({ sensors, rooms, onSensorClick, onMapClick, onAddRoomFromMap, user
         alignItems: 'center',
         marginBottom: '20px'
       }}>
-        <h2>🗺️ Campus Map - Sensor Locations</h2>
+        
         <MapLegend />
       </div>
 

@@ -1,5 +1,7 @@
+
 import React from 'react';
 import Map from '../Map';
+import MapHideButton from '../Common/MapHideButton';
 
 const MapSection = ({ 
   showMap, 
@@ -19,21 +21,8 @@ const MapSection = ({
         alignItems: 'center',
         marginBottom: '20px'
       }}>
-        <h2>🗺️ Campus Map</h2>
-        <button
-          onClick={onToggleMap}
-          style={{
-            padding: '10px 20px',
-            background: showMap ? '#FF5722' : '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          {showMap ? '🗺️ Hide Map' : '🗺️ Show Map'}
-        </button>
+        <h2>🗺️ Campus Map - Sensors & Rooms Locations</h2>
+  {showMap && <MapHideButton onHide={onToggleMap} />}
       </div>
 
       {/* Map component */}

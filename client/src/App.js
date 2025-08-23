@@ -9,6 +9,7 @@ import RoomsSection from './components/Rooms/RoomsSection';
 import Header from './components/Layout/Header';
 import SensorsSection from './components/Sensors/SensorsSection';
 import MessageBanner from './components/Common/MessageBanner';
+import MapToggleButton from './components/Common/MapToggleButton';
 import MapSection from './components/Map/MapSection';
 import apiService from './services/apiService';
 import AddRoomModal from './components/Modals/AddRoomModal';
@@ -335,27 +336,8 @@ const Dashboard = ({ user, onLogout }) => {
             transition: 'max-width 0.3s',
           }}
         >
-          {/* Show "Show Map" button if map is hidden */}
-          {!showMap && (
-            <button
-              style={{
-                alignSelf: 'flex-end',
-                marginBottom: '12px',
-                padding: '8px 18px',
-                background: '#2196F3',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                fontSize: '1em',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.07)'
-              }}
-              onClick={() => setShowMap(true)}
-            >
-              Show Map
-            </button>
-          )}
+          {/* Show/Hide Map Button extracted to component */}
+          <MapToggleButton showMap={showMap} onShow={() => setShowMap(true)} />
           <MessageBanner message={message} />
           <StatsCards sensors={sensors} rooms={rooms} />
       <AreasOverview
