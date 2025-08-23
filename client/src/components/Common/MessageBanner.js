@@ -3,10 +3,10 @@ import React from 'react';
 const MessageBanner = ({ message }) => {
   if (!message) return null;
 
-  // Detect success by emoji or keywords (English/Hebrew)
+  // Detect success by emoji or English keywords only
   const isSuccess =
     message.includes('✅') ||
-    /success|הצלחה|עודכן|נשמר|נוסף|נמחק|התווסף|הוסר|saved|updated|added|deleted|removed/i.test(message);
+    /success|saved|updated|added|deleted|removed/i.test(message);
 
   return (
     <div style={{
