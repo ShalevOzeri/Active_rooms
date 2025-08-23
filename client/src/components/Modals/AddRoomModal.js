@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../../services/apiService';
 
-const AddRoomModal = ({ isOpen, onClose, onSave, user }) => {
+const AddRoomModal = ({ isOpen, onClose, onSave, user, initialX, initialY }) => {
   const [areas, setAreas] = useState([]);
   const [form, setForm] = useState({
     id: '',
     description: '',
     room_number: '',
-    x: '',
-    y: '',
+    x: initialX || '',
+    y: initialY || '',
     floor: '',
     area_id: ''
   });
@@ -23,14 +23,14 @@ const AddRoomModal = ({ isOpen, onClose, onSave, user }) => {
         id: '',
         description: '',
         room_number: '',
-        x: '',
-        y: '',
+        x: initialX || '',
+        y: initialY || '',
         floor: '',
         area_id: ''
       });
       setErrors([]);
     }
-  }, [isOpen]);
+  }, [isOpen, initialX, initialY]);
 
   const validate = () => {
     const errs = [];

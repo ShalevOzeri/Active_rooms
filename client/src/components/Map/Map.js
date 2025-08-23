@@ -1,12 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import SensorMarker from './SensorMarker';
 import MapLegend from './MapLegend';
-import AddSensorDialog from './AddSensorDialog'; // import the dialog
+// import AddSensorDialog from './AddSensorDialog';
 
-const Map = ({ sensors, rooms, onSensorClick, onMapClick }) => {
+// Modal for choosing between room/sensor
+function ChooseAddTypeModal({ x, y, onChoose, onCancel }) {
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      background: 'rgba(0,0,0,0.3)', zIndex: 2000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center'
+    }} onClick={onCancel}>
+      <div style={{ background: 'white', padding: 24, borderRadius: 10, minWidth: 260 }} onClick={e => e.stopPropagation()}>
+  <h4 style={{marginBottom:16}}>What would you like to add?</h4>
+  <button style={{width:'100%',marginBottom:10,padding:10,background:'#2196f3',color:'white',border:'none',borderRadius:6,fontSize:16,cursor:'pointer'}} onClick={()=>onChoose('room')}>Add Room</button>
+  <button style={{width:'100%',marginBottom:10,padding:10,background:'#4caf50',color:'white',border:'none',borderRadius:6,fontSize:16,cursor:'pointer'}} onClick={()=>onChoose('sensor')}>Add Sensor</button>
+  <button style={{width:'100%',padding:10,background:'#f44336',color:'white',border:'none',borderRadius:6,fontSize:16,cursor:'pointer'}} onClick={onCancel}>Cancel</button>
+        <div style={{marginTop:16,fontSize:13,color:'#888'}}>x: {x} | y: {y}</div>
+      </div>
+    </div>
+  );
+}
+
+const Map = ({ sensors, rooms, onSensorClick, onMapClick, onAddRoomFromMap }) => {
   const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [addSensorPos, setAddSensorPos] = useState(null);
+  // const [addSensorPos, setAddSensorPos] = useState(null);
+  const [chooseType, setChooseType] = useState(null); // {x, y} or null
 
   // Load image dimensions
   useEffect(() => {
@@ -38,13 +58,23 @@ const Map = ({ sensors, rooms, onSensorClick, onMapClick }) => {
     const rect = e.target.getBoundingClientRect();
     const x = Math.round((e.clientX - rect.left) * 800 / rect.width);
     const y = Math.round((e.clientY - rect.top) * 600 / rect.height);
-    if (onMapClick) onMapClick(x, y);
+    setChooseType({ x, y });
   };
 
   // Handle dialog close or sensor add
-  const handleDialogClose = () => setAddSensorPos(null);
-  const handleAddSensor = (sensorData) => {
-    setAddSensorPos(null);
+  // const handleDialogClose = () => setAddSensorPos(null);
+  // const handleAddSensor = (sensorData) => {
+  //   setAddSensorPos(null);
+  // };
+
+  // Handle choose type modal
+  const handleChooseType = (type) => {
+    if (type === 'sensor') {
+      if (onMapClick) onMapClick(chooseType.x, chooseType.y);
+    } else if (type === 'room') {
+      if (onAddRoomFromMap) onAddRoomFromMap(chooseType);
+    }
+    setChooseType(null);
   };
 
   if (!imageLoaded) {
@@ -108,6 +138,7 @@ const Map = ({ sensors, rooms, onSensorClick, onMapClick }) => {
           }}
         />
 
+
         {/* Sensors on the map */}
         {sensors.map(sensor => {
           const position = getSensorPosition(
@@ -115,7 +146,6 @@ const Map = ({ sensors, rooms, onSensorClick, onMapClick }) => {
             mapDimensions.width,
             mapDimensions.height
           );
-
           return (
             <SensorMarker
               key={sensor.id}
@@ -128,15 +158,17 @@ const Map = ({ sensors, rooms, onSensorClick, onMapClick }) => {
           );
         })}
 
-        {/* Add Sensor Dialog */}
-        {addSensorPos && (
-          <AddSensorDialog
-            position={addSensorPos}
-            rooms={rooms}
-            onAdd={handleAddSensor}
-            onCancel={handleDialogClose}
+        {/* Choose add type modal */}
+        {chooseType && (
+          <ChooseAddTypeModal
+            x={chooseType.x}
+            y={chooseType.y}
+            onChoose={handleChooseType}
+            onCancel={() => setChooseType(null)}
           />
         )}
+
+  {/* Add Sensor Dialog - הוסר, משתמשים רק במודלים הראשיים */}
       </div>
 
       {/* Statistics below the map */}

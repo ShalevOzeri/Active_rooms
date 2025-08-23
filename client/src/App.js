@@ -35,6 +35,7 @@ const Dashboard = ({ user, onLogout }) => {
     yMax: 600,
   });
   const [addSensorXY, setAddSensorXY] = useState(null);
+  const [addRoomXY, setAddRoomXY] = useState(null);
 
   const getFullRoomLabel = (roomId) => {
     const room = rooms.find(r => r.id === roomId);
@@ -338,7 +339,15 @@ const Dashboard = ({ user, onLogout }) => {
                       setAddSensorXY({ x, y });
                       setShowAddModal(true);
                     }
-                  : undefined // do not pass anything if not admin
+                  : undefined
+              }
+              onAddRoomFromMap={
+                user?.role === 'admin'
+                  ? ({ x, y }) => {
+                      setShowAddRoomModal(true);
+                      setAddRoomXY({ x, y });
+                    }
+                  : undefined
               }
             />
           </div>
@@ -377,9 +386,14 @@ const Dashboard = ({ user, onLogout }) => {
       {/* --- Add Room Modal --- */}
       <AddRoomModal
         isOpen={showAddRoomModal}
-        onClose={() => setShowAddRoomModal(false)}
+        onClose={() => {
+          setShowAddRoomModal(false);
+          setAddRoomXY(null);
+        }}
         onSave={handleAddRoom}
         user={user}
+        initialX={addRoomXY?.x}
+        initialY={addRoomXY?.y}
       />
 
       <EditRoomModal
@@ -392,7 +406,7 @@ const Dashboard = ({ user, onLogout }) => {
       />
     </div>
   );
-};
+}
 
 function App() {
   const [user, setUser] = useState(null);
