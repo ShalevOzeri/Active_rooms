@@ -76,8 +76,8 @@ app.delete('/api/rooms/:id', authenticateUser, requireAdmin, async (req, res) =>
             return res.status(404).json({ success: false, message: 'Room not found' });
         }
 
-    // 2. Unassign all sensors in this room (set room_id to NULL)
-    await pool.execute('UPDATE sensors SET room_id = NULL WHERE room_id = ?', [roomId]);
+        // 2. Delete all sensors in this room
+        await pool.execute('DELETE FROM sensors WHERE room_id = ?', [roomId]);
 
         // 3. Remove all area-room relations for this room
         await pool.execute('DELETE FROM area_room WHERE room_id = ?', [roomId]);
