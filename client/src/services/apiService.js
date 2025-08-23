@@ -7,6 +7,16 @@ const createAuthHeaders = (user) => ({
 });
 
 const apiService = {
+  // Add new area
+  addArea: async (user, areaData) => {
+    const response = await fetch(`${API_BASE_URL}/areas`, {
+      method: 'POST',
+      headers: createAuthHeaders(user),
+      body: JSON.stringify(areaData)
+    });
+    const data = await response.json();
+    return data;
+  },
   // Fetch rooms data
   fetchRooms: async () => {
     const response = await fetch(`${API_BASE_URL}/rooms`);

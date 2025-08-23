@@ -262,6 +262,7 @@ app.get('/api/rooms', async (req, res) => {
 
 // --- Add Room (admin only) ---
 app.post('/api/rooms', authenticateUser, requireAdmin, async (req, res) => {
+
     try {
         const { id, description, room_number, x, y, floor, area_id } = req.body;
 
@@ -319,6 +320,9 @@ app.post('/api/rooms', authenticateUser, requireAdmin, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Validation failed', errors });
         }
 
+        // Convert empty string floor to null
+        const floorValue = (floor === undefined || floor === null || floor === '') ? null : floor;
+
         await pool.execute(
             `INSERT INTO rooms (id, description, area, x, y, floor, room_name) VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
@@ -327,10 +331,18 @@ app.post('/api/rooms', authenticateUser, requireAdmin, async (req, res) => {
                 areaIdToUse,
                 x,
                 y,
-                floor !== undefined && floor !== null && floor !== '' ? floor : null,
+                floorValue,
                 room_number
             ]
         );
+
+        // Update area_room table if area is set
+        if (areaIdToUse) {
+            await pool.execute(
+                `INSERT INTO area_room (area_id, room_id, room_name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE area_id = VALUES(area_id), room_name = VALUES(room_name)`,
+                [areaIdToUse, id, room_number]
+            );
+        }
 
         // Return the new room
         const [roomRows] = await pool.execute(
@@ -351,173 +363,67 @@ app.post('/api/rooms', authenticateUser, requireAdmin, async (req, res) => {
         });
     }
 });
-// --- Delete Room (admin only, sensors remain with room_id = NULL) ---
-app.delete('/api/rooms/:id', authenticateUser, requireAdmin, async (req, res) => {
-    try {
+
+    app.put('/api/rooms/:id', authenticateUser, requireAdmin, async (req, res) => {
         const roomId = req.params.id;
-
-        // Debug log for incoming request
-        console.log('DELETE /api/rooms/:id called with id:', roomId);
-
-        if (!roomId || typeof roomId !== 'string' || roomId.trim() === '') {
-            console.log('Room ID missing or invalid');
-            return res.status(400).json({
-                success: false,
-                message: 'Room ID is required and must be a valid string'
-            });
+        const data = req.body;
+        const errors = validateRoomData({ ...data, id: roomId });
+        if (errors.length > 0) {
+            return res.status(400).json({ success: false, errors });
         }
-
-        // Check if room exists
-        const [existingRooms] = await pool.execute(
-            'SELECT id FROM rooms WHERE id = ?',
-            [roomId]
-        );
-        console.log('Room lookup result:', existingRooms);
-
-        if (existingRooms.length === 0) {
-            console.log('Room not found in DB');
-            return res.status(404).json({
-                success: false,
-                message: `Room ${roomId} not found`
-            });
+        try {
+            // Build update query dynamically
+            const fields = [];
+            const values = [];
+            if (data.description !== undefined) {
+                fields.push('description = ?');
+                values.push(data.description);
+            }
+            if (data.area !== undefined) {
+                fields.push('area = ?');
+                values.push(data.area);
+            }
+            if (data.x !== undefined) {
+                fields.push('x = ?');
+                values.push(data.x);
+            }
+            if (data.y !== undefined) {
+                fields.push('y = ?');
+                values.push(data.y);
+            }
+            if (data.floor !== undefined) {
+                fields.push('floor = ?');
+                values.push(data.floor === '' ? null : data.floor);
+            }
+            if (fields.length === 0) {
+                return res.status(400).json({ success: false, message: 'No fields to update' });
+            }
+            values.push(roomId);
+            const [result] = await pool.execute(
+                `UPDATE rooms SET ${fields.join(', ')} WHERE id = ?`,
+                values
+            );
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ success: false, message: 'Room not found' });
+            }
+            // Update area_room table if area is set
+            if (data.area !== undefined) {
+                // get room_name (prefer from data, else fetch from DB)
+                let roomName = data.room_name;
+                if (!roomName) {
+                    const [rows] = await pool.execute('SELECT room_name FROM rooms WHERE id = ?', [roomId]);
+                    roomName = rows.length > 0 ? rows[0].room_name : null;
+                }
+                await pool.execute(
+                    `INSERT INTO area_room (area_id, room_id, room_name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE area_id = VALUES(area_id), room_name = VALUES(room_name)`,
+                    [data.area, roomId, roomName]
+                );
+            }
+            res.json({ success: true, message: 'Room updated successfully' });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
         }
-
-        // Set room_id to NULL for all sensors referencing this room
-        const [updateSensors] = await pool.execute(
-            'UPDATE sensors SET room_id = NULL WHERE room_id = ?',
-            [roomId]
-        );
-        console.log(`Updated sensors (set room_id=NULL) for room ${roomId}:`, updateSensors.affectedRows);
-
-        // Delete from area_room (if exists)
-        const [areaRoomDelResult] = await pool.execute(
-            'DELETE FROM area_room WHERE room_id = ?',
-            [roomId]
-        );
-        console.log('Deleted area_room rows:', areaRoomDelResult.affectedRows);
-
-        // Delete the room
-        const [result] = await pool.execute(
-            'DELETE FROM rooms WHERE id = ?',
-            [roomId]
-        );
-        console.log('Deleted rooms rows:', result.affectedRows);
-
-        if (result.affectedRows > 0) {
-            console.log(`Room ${roomId} deleted successfully`);
-            res.json({
-                success: true,
-                message: `Room ${roomId} deleted successfully. Sensors remain in DB with no room.`
-            });
-        } else {
-            console.log('Failed to delete room');
-            res.status(500).json({
-                success: false,
-                message: 'Failed to delete room'
-            });
-        }
-    } catch (error) {
-        console.error('❌ Error in DELETE /api/rooms/:id:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Database error: ' + error.message
-        });
-    }
-});
-
-// --- Update Room (admin only) ---
-app.put('/api/rooms/:id', authenticateUser, requireAdmin, async (req, res) => {
-    // Extract room ID from URL and fields from request body
-    const roomId = req.params.id;
-    const { room_name, floor, area, x, y } = req.body;
-
-    // Validation: collect errors for missing or invalid fields
-    const errors = [];
-    if (!roomId || typeof roomId !== 'string' || roomId.trim() === '')
-        errors.push('Room ID is required and must be a non-empty string');
-    // Room name: allow any non-empty value (string or number)
-    if (
-        room_name === undefined ||
-        room_name === null ||
-        (typeof room_name === 'string' && room_name.toString().trim() === '') ||
-        (typeof room_name === 'number' && room_name.toString().trim() === '')
-    )
-        errors.push('Room name is required and must be a non-empty string');
-    // Floor is optional
-    if (floor !== undefined && floor !== null && floor !== '' && isNaN(floor))
-        errors.push('Floor must be a number');
-    // Area is optional
-    if (area !== undefined && area !== null && area !== '') {
-        if (isNaN(area)) errors.push('Area must be a number');
-        else {
-            const [areas] = await pool.execute('SELECT id FROM areas WHERE id = ?', [area]);
-            if (areas.length === 0)
-                errors.push('Selected area does not exist');
-        }
-    }
-    // X/Y: must be numbers in range
-    if (
-        x === undefined ||
-        y === undefined ||
-        x === '' ||
-        y === '' ||
-        isNaN(x) ||
-        isNaN(y)
-    ) {
-        errors.push('x and y coordinates are required and must be numbers');
-    } else {
-        if (x < 0 || x > 800)
-            errors.push('X must be between 0 and 800');
-        if (y < 0 || y > 600)
-            errors.push('Y must be between 0 and 600');
-    }
-
-    // Check if room exists in the database
-    const [existingRooms] = await pool.execute('SELECT * FROM rooms WHERE id = ?', [roomId]);
-    if (existingRooms.length === 0)
-        errors.push('Room not found');
-
-    // If any validation errors, return 400 with error details and STOP
-    if (errors.length > 0) {
-        // Prevent further code execution after sending response
-        return res.status(400).json({ success: false, message: 'Validation failed', errors });
-    }
-
-    // Update the room in the database
-    await pool.execute(
-        `UPDATE rooms SET room_name = ?, floor = ?, area = ?, x = ?, y = ? WHERE id = ?`,
-        [
-            room_name,
-            floor !== undefined && floor !== null && floor !== '' ? floor : null,
-            area !== undefined && area !== null && area !== '' ? area : null,
-            x,
-            y,
-            roomId
-        ]
-    );
-
-    // If there are sensors linked to this room, update their x/y as well
-    const [sensors] = await pool.execute('SELECT id FROM sensors WHERE room_id = ?', [roomId]);
-    if (sensors.length > 0) {
-        await pool.execute(
-            `UPDATE sensors SET x = ?, y = ?, updated_at = CURRENT_TIMESTAMP WHERE room_id = ?`,
-            [x, y, roomId]
-        );
-    }
-
-    // Fetch and return the updated room details
-    const [updatedRoom] = await pool.execute(
-        `SELECT r.*, a.name as area_name FROM rooms r LEFT JOIN areas a ON r.area = a.id WHERE r.id = ?`,
-        [roomId]
-    );
-
-    res.json({
-        success: true,
-        message: 'Room updated successfully',
-        data: updatedRoom[0]
     });
-});
-
 // === SENSORS API ===
 app.get('/api/sensors', authenticateUser, async (req, res) => {
     try {
@@ -825,6 +731,44 @@ app.get('/api/areas', async (req, res) => {
     }
 });
 
+// --- Add Area (admin only) ---
+app.post('/api/areas', authenticateUser, requireAdmin, async (req, res) => {
+    try {
+        const { id, name, description } = req.body;
+        const errors = [];
+        // Validation
+        if (!name || typeof name !== 'string' || name.trim().length < 2 || name.length > 100)
+            errors.push('Name is required (2-100 chars)');
+        if (description && description.length > 255)
+            errors.push('Description must be 255 chars or less');
+        if (id && (typeof id !== 'string' || id.length > 10))
+            errors.push('ID must be up to 10 chars');
+        // Check unique id if provided
+        if (id) {
+            const [existing] = await pool.execute('SELECT id FROM areas WHERE id = ?', [id]);
+            if (existing.length > 0) errors.push('ID already exists');
+        }
+        if (errors.length > 0) {
+            return res.status(400).json({ success: false, message: 'Validation failed', errors });
+        }
+        // Insert
+        const insertFields = [];
+        const insertValues = [];
+        if (id) { insertFields.push('id'); insertValues.push(id); }
+        insertFields.push('name'); insertValues.push(name);
+        insertFields.push('description'); insertValues.push(description || null);
+        const fieldsStr = insertFields.join(', ');
+        const qMarks = insertFields.map(() => '?').join(', ');
+        await pool.execute(`INSERT INTO areas (${fieldsStr}) VALUES (${qMarks})`, insertValues);
+        // Return new area
+        const [rows] = await pool.execute('SELECT * FROM areas WHERE id = ?', [id || (await pool.execute('SELECT LAST_INSERT_ID() as id'))[0][0].id]);
+        res.status(201).json({ success: true, message: 'Area added successfully', data: rows[0] });
+    } catch (error) {
+        console.error('❌ Error adding area:', error);
+        res.status(500).json({ success: false, message: 'Error adding area', error: error.message });
+    }
+});
+
 // === STATUS API ===
 app.get('/api/status', (req, res) => {
     res.json({
@@ -846,18 +790,3 @@ app.listen(PORT, () => {
     console.log(`📡 API Base URL: http://localhost:${PORT}/api`);
     console.log(`✅ Comprehensive validation enabled`);
 });
-
-// Place this at the END of your routes, after all API endpoints:
-app.use((req, res, next) => {
-    res.status(404).send('Not Found');
-});
-app.use((req, res, next) => {
-    res.status(404).send('Not Found');
-});
-app.use((req, res, next) => {
-    res.status(404).send('Not Found');
-});
-app.use((req, res, next) => {
-    res.status(404).send('Not Found');
-});
-

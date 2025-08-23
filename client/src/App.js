@@ -16,6 +16,26 @@ import EditRoomModal from './components/Modals/EditRoomModal';
 
 // Enhanced Dashboard Component with Admin Features
 const Dashboard = ({ user, onLogout }) => {
+  // Add Area handler
+  const handleAddArea = async (areaData) => {
+    setLoading(true);
+    try {
+      const res = await apiService.addArea(user, areaData);
+      if (res.success) {
+        setMessage('Area added successfully!');
+        fetchData();
+        return { success: true };
+      } else {
+        setMessage(res.message || 'Error adding area');
+        return { success: false, errors: res.errors || [res.message || 'Error adding area'] };
+      }
+    } catch (err) {
+      setMessage('Error adding area');
+      return { success: false, errors: ['Error adding area'] };
+    } finally {
+      setLoading(false);
+    }
+  };
   const [sensors, setSensors] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -289,7 +309,7 @@ const Dashboard = ({ user, onLogout }) => {
           )}
           <MessageBanner message={message} />
           <StatsCards sensors={sensors} rooms={rooms} />
-          <AreasOverview rooms={rooms} sensors={sensors} />
+      <AreasOverview rooms={rooms} sensors={sensors} user={user} onAddArea={handleAddArea} areas={areas} />
           <SensorsSection
             sensors={sensors}
             user={user}

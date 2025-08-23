@@ -1,21 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
+import AddAreaModal from '../Modals/AddAreaModal';
 
-const AreasOverview = ({ rooms, sensors }) => {
+const AreasOverview = ({ rooms, sensors, user, onAddArea, areas = [] }) => {
+  const [showAddArea, setShowAddArea] = useState(false);
+  const handleAddArea = (areaData) => {
+    setShowAddArea(false);
+    if (onAddArea) onAddArea(areaData);
+  };
   return (
     <div style={{background: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px'}}>
-      <h2>Areas Overview</h2>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+        <h2>Areas Overview</h2>
+        {user?.role === 'admin' && (
+          <button
+            style={{
+              background:'#43a047',color:'white',border:'none',borderRadius:6,padding:'8px 18px',fontSize:16,fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',gap:8,boxShadow:'0 1px 4px rgba(67,160,71,0.13)'
+            }}
+            aria-label="Add Area"
+            onClick={() => setShowAddArea(true)}
+          >
+            <span style={{fontSize:22,lineHeight:1}}>➕</span> Add Area
+          </button>
+        )}
+        <AddAreaModal isOpen={showAddArea} onClose={() => setShowAddArea(false)} onSave={handleAddArea} />
+      </div>
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px',justifyContent: 'start',direction: 'ltr' }}>
-        {/* Get unique list of areas */}
-        {[...new Set(rooms.map(room => room.area_name).filter(Boolean))]
-          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-          .map(areaName => {
-            const areaRooms = rooms.filter(room => room.area_name === areaName);
+        {/* הצגת כל האזורים מהמערך areas */}
+        {areas
+          .sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true }))
+          .map(area => {
+            const areaRooms = rooms.filter(room => room.area === area.id || room.area_name === area.name);
             const areaSensors = sensors.filter(sensor => 
               areaRooms.some(room => room.id === sensor.room_id)
             );
             return (
               <div
-                key={areaName}
+                key={area.id || area.name}
                 style={{
                   padding: '20px',
                   borderRadius: '12px',
@@ -34,7 +54,7 @@ const AreasOverview = ({ rooms, sensors }) => {
                 }}>
                   <div style={{fontSize: '24px', marginRight: '10px'}}>🏢</div>
                   <h3 style={{margin: 0, fontSize: '20px', fontWeight: 'bold'}}>
-                    {areaName || 'Unknown Area'}
+                    {area.name || 'Unknown Area'}
                   </h3>
                 </div>
 
