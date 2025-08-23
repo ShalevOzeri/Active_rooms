@@ -23,7 +23,7 @@ const apiService = {
     const data = await response.json();
     return data;
   },
-
+  
   // Fetch sensors data
   fetchSensors: async (user) => {
     const response = await fetch(`${API_BASE_URL}/sensors`, {
@@ -35,7 +35,19 @@ const apiService = {
     const data = await response.json();
     return data;
   },
-
+  // Delete area (admin only)
+  deleteArea: async (user, areaId) => {
+    const response = await fetch(`${API_BASE_URL}/areas/${areaId}`, {
+      method: 'DELETE',
+      headers: {
+        'username': user.credentials.username,
+        'password': user.credentials.password
+      }
+    });
+    const data = await response.json();
+    return data;
+  },
+  
   // Add new sensor
   addSensor: async (user, sensorData) => {
     const response = await fetch(`${API_BASE_URL}/sensors`, {

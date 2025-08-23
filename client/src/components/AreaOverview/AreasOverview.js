@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AddAreaModal from '../Modals/AddAreaModal';
 
-const AreasOverview = ({ rooms, sensors, user, onAddArea, areas = [] }) => {
+const AreasOverview = ({ rooms, sensors, user, onAddArea, onDeleteArea, areas = [] }) => {
   const [showAddArea, setShowAddArea] = useState(false);
   const handleAddArea = (areaData) => {
     setShowAddArea(false);
@@ -25,7 +25,7 @@ const AreasOverview = ({ rooms, sensors, user, onAddArea, areas = [] }) => {
         <AddAreaModal isOpen={showAddArea} onClose={() => setShowAddArea(false)} onSave={handleAddArea} />
       </div>
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px',justifyContent: 'start',direction: 'ltr' }}>
-        {/* הצגת כל האזורים מהמערך areas */}
+        {/* Display all areas from the areas array */}
         {areas
           .sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true }))
           .map(area => {
@@ -37,6 +37,7 @@ const AreasOverview = ({ rooms, sensors, user, onAddArea, areas = [] }) => {
               <div
                 key={area.id || area.name}
                 style={{
+                  position: 'relative',
                   padding: '20px',
                   borderRadius: '12px',
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -44,6 +45,29 @@ const AreasOverview = ({ rooms, sensors, user, onAddArea, areas = [] }) => {
                   boxShadow: '0 6px 12px rgba(0,0,0,0.1)'
                 }}
               >
+                {/* Delete Area Button (admin only) */}
+                {user?.role === 'admin' && (
+                  <button
+                    onClick={() => onDeleteArea && onDeleteArea(area.id)}
+                    style={{
+                      position: 'absolute',
+                      top: '5px',
+                      right: '5px',
+                      background: '#0000004d',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '24px',
+                      height: '24px',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      zIndex: 2
+                    }}
+                    title="Delete Area"
+                  >
+                    ✕
+                  </button>
+                )}
                 {/* Area title */}
                 <div style={{
                   display: 'flex',

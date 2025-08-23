@@ -233,6 +233,24 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handleDeleteArea = async (areaId) => {
+    if (!window.confirm('Are you sure you want to delete this area?')) return;
+    setLoading(true);
+    try {
+      const res = await apiService.deleteArea(user, areaId);
+      if (res.success) {
+        setMessage('Area deleted successfully!');
+        fetchData();
+      } else {
+        setMessage(res.message || 'Error deleting area');
+      }
+    } catch (err) {
+      setMessage('Error deleting area');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Auto-hide message after 3 seconds
   useEffect(() => {
     if (message) {
@@ -309,7 +327,7 @@ const Dashboard = ({ user, onLogout }) => {
           )}
           <MessageBanner message={message} />
           <StatsCards sensors={sensors} rooms={rooms} />
-      <AreasOverview rooms={rooms} sensors={sensors} user={user} onAddArea={handleAddArea} areas={areas} />
+      <AreasOverview rooms={rooms} sensors={sensors} user={user} onAddArea={handleAddArea} onDeleteArea={handleDeleteArea} areas={areas} />
           <SensorsSection
             sensors={sensors}
             user={user}

@@ -1,3 +1,4 @@
+
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -775,6 +776,40 @@ app.post('/api/areas', authenticateUser, requireAdmin, async (req, res) => {
     } catch (error) {
         console.error('❌ Error adding area:', error);
         res.status(500).json({ success: false, message: 'Error adding area', error: error.message });
+    }
+});
+
+// --- Delete Area (admin only) ---
+// This endpoint deletes an area by its ID. It requires admin authentication.
+// Steps:
+// 1. Check if the area exists.
+// 2. Remove all area-room relations for this area (area_room table).
+// 3. Set area=null for all rooms that belong to this area.
+// 4. Delete the area from the areas table.
+// 5. Return success or error message.
+app.delete('/api/areas/:id', authenticateUser, requireAdmin, async (req, res) => {
+    const areaId = req.params.id;
+    try {
+        // 1. Check if the area exists
+        const [areas] = await pool.execute('SELECT id FROM areas WHERE id = ?', [areaId]);
+        if (areas.length === 0) {
+            return res.status(404).json({ success: false, message: 'Area not found' });
+        }
+        // 2. Remove all area-room relations for this area
+        await pool.execute('DELETE FROM area_room WHERE area_id = ?', [areaId]);
+        // 3. Set area=null for all rooms that belong to this area
+        await pool.execute('UPDATE rooms SET area = NULL WHERE area = ?', [areaId]);
+        // 4. Delete the area from the areas table
+        const [result] = await pool.execute('DELETE FROM areas WHERE id = ?', [areaId]);
+        // 5. Return success or error message
+        if (result.affectedRows > 0) {
+            res.json({ success: true, message: 'Area deleted successfully' });
+        } else {
+            res.status(500).json({ success: false, message: 'Failed to delete area' });
+        }
+    } catch (error) {
+        console.error('❌ Error deleting area:', error);
+        res.status(500).json({ success: false, message: 'Error deleting area', error: error.message });
     }
 });
 
