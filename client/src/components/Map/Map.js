@@ -139,39 +139,6 @@ const Map = ({ sensors, rooms, onSensorClick, onMapClick, onAddRoomFromMap, user
           }}
         />
 
-
-        {/* Rooms on the map as blue squares */}
-        {rooms.filter(room => room.x !== undefined && room.y !== undefined && room.x !== '' && room.y !== '').map(room => {
-          const pos = getSensorPosition(room, mapDimensions.width, mapDimensions.height);
-          return (
-            <div
-              key={room.id}
-              style={{
-                position: 'absolute',
-                left: pos.x - 18,
-                top: pos.y - 18,
-                width: 36,
-                height: 36,
-                background: 'rgba(33,150,243,0.25)',
-                border: '2px solid #2196f3',
-                borderRadius: 6,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#1565c0',
-                fontWeight: 600,
-                fontSize: 13,
-                zIndex: 2,
-                pointerEvents: 'none',
-                boxShadow: '0 2px 8px rgba(33,150,243,0.10)'
-              }}
-              title={`Room: ${room.room_name || room.id}`}
-            >
-              {room.room_name || room.id}
-            </div>
-          );
-        })}
-
         {/* Sensors on the map */}
         {sensors.map(sensor => {
           const position = getSensorPosition(
