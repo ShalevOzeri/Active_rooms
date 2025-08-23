@@ -16,7 +16,7 @@ const AddAreaModal = ({ isOpen, onClose, onSave, serverErrors }) => {
       return;
     }
     onSave(form);
-    // לא לאפס טופס/שגיאות כאן, כי נרצה להציג שגיאות מהשרת
+    // Do not reset form/errors here, since we want to show server errors
   };
 
   if (!isOpen) return null;
