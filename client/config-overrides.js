@@ -1,15 +1,15 @@
 // client/config-overrides.js
 module.exports = {
-  // לא משנות את קונפיג ה-webpack עצמו
+  // Does not change the webpack config itself
   webpack: function (config, env) {
     return config;
   },
 
-  // משנות את קונפיג devServer כדי למנוע את השגיאה של allowedHosts
+    // Changes the devServer config to prevent the allowedHosts error
   devServer: function (configFunction) {
     return function (proxy, allowedHost) {
       const config = configFunction(proxy, allowedHost);
-      config.allowedHosts = 'all'; // <-- הפוך את זה ל"all" במקום מערך ריק
+        config.allowedHosts = 'all'; // <-- Set this to "all" instead of an empty array
       return config;
     };
   },

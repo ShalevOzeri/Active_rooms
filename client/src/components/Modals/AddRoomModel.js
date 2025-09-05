@@ -268,9 +268,7 @@ const AddRoomModel = ({ isOpen, onClose, onSave, areas = [], initialX, initialY,
               style={{ width: '100%', padding: '8px 12px', border: '2px solid #ddd', borderRadius: '6px', fontSize: '14px' }}
             >
               {/* <option value="">
-                {filteredAreas.length ? '-- Choose area --' : '-- No areas in this map --'}
-              </option> */}
-                {/* תמיד זמין: ללא אזור */}
+                {/* Always available: No Area */}
                <option value="">— No Area —</option>
               {filteredAreas.map(area => (
                 <option key={area.id} value={area.id}>{area.name}</option>

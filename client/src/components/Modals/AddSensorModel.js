@@ -108,7 +108,7 @@ import React, { useState } from 'react';
     const handleIdChange = async (e) => {
       const value = e.target.value.toUpperCase();
       setSensorData({ ...sensorData, id: value });
-      // אם הערך תקין, הסר את הודעת השגיאה מידית
+  // If the value is valid, remove the error message immediately
       if (/^S\d{3}$/.test(value)) {
         setErrors(prev => { const updated = { ...prev }; delete updated.id; return updated; });
       }
